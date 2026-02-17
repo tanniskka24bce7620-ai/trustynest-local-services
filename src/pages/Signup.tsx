@@ -4,7 +4,7 @@ import { useAuth, UserRole } from "@/lib/authContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Wrench, Users } from "lucide-react";
+import { Wrench, Users, Loader2 } from "lucide-react";
 
 const Signup = () => {
   const { role } = useParams<{ role: string }>();
@@ -14,12 +14,21 @@ const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password) return;
-    signup(name, email, password, userRole);
-    navigate("/verify-aadhaar");
+    setLoading(true);
+    setError("");
+    const result = await signup(name, email, password, userRole);
+    setLoading(false);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      navigate("/verify-aadhaar");
+    }
   };
 
   const isProvider = userRole === "provider";
@@ -36,6 +45,10 @@ const Signup = () => {
             <p className="mt-1 text-sm text-muted-foreground">Join ServNest today</p>
           </div>
 
+          {error && (
+            <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="name">Full Name</Label>
@@ -49,7 +62,10 @@ const Signup = () => {
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
-            <Button type="submit" className="w-full" size="lg">Create Account</Button>
+            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Account
+            </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">

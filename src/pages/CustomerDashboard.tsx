@@ -1,22 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/authContext";
 import { useNavigate } from "react-router-dom";
-import { MOCK_PROVIDERS, SERVICE_TYPES, ServiceProvider } from "@/lib/mockData";
+import { supabase } from "@/integrations/supabase/client";
+import { SERVICE_TYPES, SERVICE_ICONS, ServiceProvider } from "@/lib/mockData";
 import ServiceProviderCard from "@/components/ServiceProviderCard";
 import ProviderProfile from "@/components/ProviderProfile";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal, CheckCircle } from "lucide-react";
+import { Search, SlidersHorizontal, CheckCircle, Loader2 } from "lucide-react";
 
 const CustomerDashboard = () => {
-  const { user, completeProfile } = useAuth();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [profileDone, setProfileDone] = useState(false);
-  const [name, setName] = useState(user?.name || "");
+  const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [area, setArea] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const [providers, setProviders] = useState<ServiceProvider[]>([]);
+  const [loadingProviders, setLoadingProviders] = useState(true);
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -24,14 +29,101 @@ const CustomerDashboard = () => {
   const [sortBy, setSortBy] = useState<string>("rating");
   const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(null);
 
-  if (!user) {
-    navigate("/");
-    return null;
-  }
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) { navigate("/"); return; }
+    if (!user.aadhaarVerified) { navigate("/verify-aadhaar"); return; }
 
-  const handleProfileSubmit = (e: React.FormEvent) => {
+    setName(user.name);
+    if (user.profileComplete) setProfileDone(true);
+  }, [user, authLoading, navigate]);
+
+  // Load providers from DB
+  useEffect(() => {
+    const loadProviders = async () => {
+      setLoadingProviders(true);
+      const { data: serviceProfiles } = await supabase
+        .from("service_profiles")
+        .select("*");
+
+      if (!serviceProfiles || (serviceProfiles as any[]).length === 0) {
+        setProviders([]);
+        setLoadingProviders(false);
+        return;
+      }
+
+      const userIds = (serviceProfiles as any[]).map((sp: any) => sp.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("*")
+        .in("user_id", userIds);
+
+      const profileMap = new Map((profiles as any[] || []).map((p: any) => [p.user_id, p]));
+
+      // Load reviews for each service profile
+      const spIds = (serviceProfiles as any[]).map((sp: any) => sp.id);
+      const { data: allReviews } = await supabase
+        .from("reviews")
+        .select("*")
+        .in("service_profile_id", spIds);
+
+      const reviewMap = new Map<string, any[]>();
+      (allReviews as any[] || []).forEach((r: any) => {
+        const list = reviewMap.get(r.service_profile_id) || [];
+        list.push(r);
+        reviewMap.set(r.service_profile_id, list);
+      });
+
+      const mapped: ServiceProvider[] = (serviceProfiles as any[]).map((sp: any) => {
+        const profile = profileMap.get(sp.user_id) as any;
+        const reviews = reviewMap.get(sp.id) || [];
+        return {
+          id: sp.id,
+          name: profile?.name || "Unknown",
+          age: sp.age || 0,
+          experience: sp.experience || 0,
+          contact: profile?.contact || "",
+          serviceType: sp.service_type,
+          city: profile?.city || "",
+          area: profile?.area || "",
+          bio: sp.bio || "",
+          photo: profile?.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.name || "U")}&background=3b82f6&color=fff`,
+          available: sp.available,
+          verified: profile?.aadhaar_verified || false,
+          rating: parseFloat(sp.rating) || 0,
+          reviewCount: sp.review_count || 0,
+          reviews: reviews.map((r: any) => ({
+            id: r.id,
+            customerName: "Customer",
+            rating: r.rating,
+            comment: r.comment || "",
+            date: r.created_at?.slice(0, 10) || "",
+          })),
+        };
+      });
+
+      setProviders(mapped);
+      setLoadingProviders(false);
+    };
+
+    if (profileDone || (user && user.profileComplete)) {
+      loadProviders();
+    }
+  }, [profileDone, user]);
+
+  if (authLoading || !user) return null;
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    completeProfile();
+    setSaving(true);
+    await supabase.from("profiles").update({
+      name,
+      contact,
+      area,
+      profile_complete: true,
+    } as any).eq("user_id", user.id);
+    await refreshUser();
+    setSaving(false);
     setProfileDone(true);
   };
 
@@ -56,14 +148,17 @@ const CustomerDashboard = () => {
               <Label>Area / Location</Label>
               <Input value={area} onChange={(e) => setArea(e.target.value)} placeholder="e.g. Andheri West, Mumbai" required />
             </div>
-            <Button type="submit" className="w-full" size="lg">Save & Browse Services</Button>
+            <Button type="submit" className="w-full" size="lg" disabled={saving}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save & Browse Services
+            </Button>
           </form>
         </div>
       </div>
     );
   }
 
-  let filtered = MOCK_PROVIDERS.filter((p) => {
+  let filtered = providers.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.serviceType.toLowerCase().includes(search.toLowerCase()) ||
       p.area.toLowerCase().includes(search.toLowerCase()) ||
@@ -131,19 +226,26 @@ const CustomerDashboard = () => {
         </div>
       </div>
 
-      {/* Results */}
-      <p className="mb-4 text-sm text-muted-foreground">{filtered.length} service providers found</p>
-      <div className="grid gap-4 md:grid-cols-2">
-        {filtered.map((p) => (
-          <ServiceProviderCard key={p.id} provider={p} onViewProfile={setSelectedProvider} />
-        ))}
-      </div>
-
-      {filtered.length === 0 && (
-        <div className="py-16 text-center text-muted-foreground">
-          <p className="text-lg">No service providers found.</p>
-          <p className="text-sm">Try adjusting your filters.</p>
+      {loadingProviders ? (
+        <div className="flex justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
+      ) : (
+        <>
+          <p className="mb-4 text-sm text-muted-foreground">{filtered.length} service providers found</p>
+          <div className="grid gap-4 md:grid-cols-2">
+            {filtered.map((p) => (
+              <ServiceProviderCard key={p.id} provider={p} onViewProfile={setSelectedProvider} />
+            ))}
+          </div>
+
+          {filtered.length === 0 && (
+            <div className="py-16 text-center text-muted-foreground">
+              <p className="text-lg">No service providers found.</p>
+              <p className="text-sm">Try adjusting your filters or check back later.</p>
+            </div>
+          )}
+        </>
       )}
 
       {selectedProvider && <ProviderProfile provider={selectedProvider} onClose={() => setSelectedProvider(null)} />}

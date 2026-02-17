@@ -1,49 +1,127 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 export type UserRole = "provider" | "customer" | null;
 
 interface AuthUser {
+  id: string;
   email: string;
   name: string;
   role: UserRole;
-  verified: boolean;
+  aadhaarVerified: boolean;
   profileComplete: boolean;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
-  login: (email: string, password: string, role: UserRole) => void;
-  signup: (name: string, email: string, password: string, role: UserRole) => void;
-  logout: () => void;
-  verifyAadhaar: () => void;
-  completeProfile: () => void;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<{ error: string | null }>;
+  signup: (name: string, email: string, password: string, role: UserRole) => Promise<{ error: string | null }>;
+  logout: () => Promise<void>;
+  verifyAadhaar: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+async function buildAuthUser(supaUser: User): Promise<AuthUser | null> {
+  // Fetch profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("user_id", supaUser.id)
+    .maybeSingle();
+
+  // Fetch role
+  const { data: roleData } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", supaUser.id)
+    .maybeSingle();
+
+  return {
+    id: supaUser.id,
+    email: supaUser.email || "",
+    name: (profile as any)?.name || supaUser.user_metadata?.name || "",
+    role: (roleData as any)?.role || null,
+    aadhaarVerified: (profile as any)?.aadhaar_verified || false,
+    profileComplete: (profile as any)?.profile_complete || false,
+  };
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (email: string, _password: string, role: UserRole) => {
-    setUser({ email, name: email.split("@")[0], role, verified: false, profileComplete: false });
+  const refreshUser = async () => {
+    const { data: { user: supaUser } } = await supabase.auth.getUser();
+    if (supaUser) {
+      const authUser = await buildAuthUser(supaUser);
+      setUser(authUser);
+    } else {
+      setUser(null);
+    }
   };
 
-  const signup = (name: string, email: string, _password: string, role: UserRole) => {
-    setUser({ email, name, role, verified: false, profileComplete: false });
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const authUser = await buildAuthUser(session.user);
+        setUser(authUser);
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const authUser = await buildAuthUser(session.user);
+        setUser(authUser);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return { error: error?.message || null };
   };
 
-  const logout = () => setUser(null);
+  const signup = async (name: string, email: string, password: string, role: UserRole) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } },
+    });
+    if (error) return { error: error.message };
 
-  const verifyAadhaar = () => {
-    if (user) setUser({ ...user, verified: true });
+    // Assign role
+    if (data.user && role) {
+      await supabase.from("user_roles").insert({ user_id: data.user.id, role } as any);
+      // Update profile name
+      await supabase.from("profiles").update({ name } as any).eq("user_id", data.user.id);
+    }
+
+    return { error: null };
   };
 
-  const completeProfile = () => {
-    if (user) setUser({ ...user, profileComplete: true });
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  const verifyAadhaar = async () => {
+    if (!user) return;
+    await supabase.from("profiles").update({ aadhaar_verified: true } as any).eq("user_id", user.id);
+    setUser({ ...user, aadhaarVerified: true });
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, verifyAadhaar, completeProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, verifyAadhaar, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

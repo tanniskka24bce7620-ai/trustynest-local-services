@@ -14,16 +14,161 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          aadhaar_verified: boolean
+          area: string | null
+          city: string | null
+          contact: string | null
+          created_at: string
+          id: string
+          name: string
+          photo_url: string | null
+          profile_complete: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aadhaar_verified?: boolean
+          area?: string | null
+          city?: string | null
+          contact?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          photo_url?: string | null
+          profile_complete?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          aadhaar_verified?: boolean
+          area?: string | null
+          city?: string | null
+          contact?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          photo_url?: string | null
+          profile_complete?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          rating: number
+          service_profile_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          rating: number
+          service_profile_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          rating?: number
+          service_profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_service_profile_id_fkey"
+            columns: ["service_profile_id"]
+            isOneToOne: false
+            referencedRelation: "service_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_profiles: {
+        Row: {
+          age: number | null
+          available: boolean
+          bio: string | null
+          created_at: string
+          experience: number
+          id: string
+          rating: number
+          review_count: number
+          service_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          available?: boolean
+          bio?: string | null
+          created_at?: string
+          experience?: number
+          id?: string
+          rating?: number
+          review_count?: number
+          service_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          available?: boolean
+          bio?: string | null
+          created_at?: string
+          experience?: number
+          id?: string
+          rating?: number
+          review_count?: number
+          service_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "provider" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +295,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["provider", "customer"],
+    },
   },
 } as const

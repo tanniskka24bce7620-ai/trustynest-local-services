@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/authContext";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { SERVICE_TYPES, SERVICE_ICONS } from "@/lib/mockData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,17 +10,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Star, Edit2, Save } from "lucide-react";
+import { CheckCircle, Star, Edit2, Save, Loader2 } from "lucide-react";
 
 const ProviderDashboard = () => {
-  const { user, completeProfile } = useAuth();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   const [profileSaved, setProfileSaved] = useState(false);
   const [editing, setEditing] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [serviceProfileId, setServiceProfileId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
-    name: user?.name || "",
+    name: "",
     age: "",
     experience: "",
     contact: "",
@@ -30,18 +33,91 @@ const ProviderDashboard = () => {
     available: true,
   });
 
-  if (!user) {
-    navigate("/");
-    return null;
-  }
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) { navigate("/"); return; }
+    if (!user.aadhaarVerified) { navigate("/verify-aadhaar"); return; }
+
+    // Load existing profile & service profile
+    const load = async () => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const { data: sp } = await supabase
+        .from("service_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const p = profile as any;
+      const s = sp as any;
+
+      setForm({
+        name: p?.name || user.name || "",
+        age: s?.age?.toString() || "",
+        experience: s?.experience?.toString() || "",
+        contact: p?.contact || "",
+        serviceType: s?.service_type || "",
+        city: p?.city || "",
+        area: p?.area || "",
+        bio: s?.bio || "",
+        available: s?.available ?? true,
+      });
+
+      if (s) {
+        setServiceProfileId(s.id);
+        setProfileSaved(true);
+        setEditing(false);
+      }
+    };
+    load();
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || !user) return null;
 
   const handleChange = (field: string, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    completeProfile();
+    setSaving(true);
+
+    // Update profile
+    await supabase.from("profiles").update({
+      name: form.name,
+      contact: form.contact,
+      city: form.city,
+      area: form.area,
+      profile_complete: true,
+    } as any).eq("user_id", user.id);
+
+    // Upsert service profile
+    if (serviceProfileId) {
+      await supabase.from("service_profiles").update({
+        service_type: form.serviceType,
+        age: parseInt(form.age) || null,
+        experience: parseInt(form.experience) || 0,
+        bio: form.bio,
+        available: form.available,
+      } as any).eq("id", serviceProfileId);
+    } else {
+      const { data } = await supabase.from("service_profiles").insert({
+        user_id: user.id,
+        service_type: form.serviceType,
+        age: parseInt(form.age) || null,
+        experience: parseInt(form.experience) || 0,
+        bio: form.bio,
+        available: form.available,
+      } as any).select().maybeSingle();
+      if (data) setServiceProfileId((data as any).id);
+    }
+
+    await refreshUser();
+    setSaving(false);
     setProfileSaved(true);
     setEditing(false);
   };
@@ -60,7 +136,7 @@ const ProviderDashboard = () => {
         </div>
       </div>
 
-      {user.verified && (
+      {user.aadhaarVerified && (
         <Badge variant="outline" className="mb-4 gap-1 border-success/30 bg-success/10 text-success">
           <CheckCircle className="h-3 w-3" /> Aadhaar Verified
         </Badge>
@@ -79,7 +155,6 @@ const ProviderDashboard = () => {
           </div>
         )}
 
-        {/* Profile preview when not editing */}
         {profileSaved && !editing && (
           <div className="space-y-4">
             <div className="flex items-center gap-4">
@@ -111,12 +186,16 @@ const ProviderDashboard = () => {
             <div className="rounded-lg bg-muted p-3 text-sm">{form.bio}</div>
             <div className="flex items-center justify-between rounded-lg border border-border p-3">
               <span className="text-sm font-medium">Availability</span>
-              <Switch checked={form.available} onCheckedChange={(v) => handleChange("available", v)} />
+              <Switch checked={form.available} onCheckedChange={async (v) => {
+                handleChange("available", v);
+                if (serviceProfileId) {
+                  await supabase.from("service_profiles").update({ available: v } as any).eq("id", serviceProfileId);
+                }
+              }} />
             </div>
           </div>
         )}
 
-        {/* Edit form */}
         {editing && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -164,8 +243,9 @@ const ProviderDashboard = () => {
               <span className="text-sm font-medium">Available for work</span>
               <Switch checked={form.available} onCheckedChange={(v) => handleChange("available", v)} />
             </div>
-            <Button type="submit" className="w-full" size="lg">
-              <Save className="mr-2 h-4 w-4" /> Save Profile
+            <Button type="submit" className="w-full" size="lg" disabled={saving}>
+              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              Save Profile
             </Button>
           </form>
         )}
