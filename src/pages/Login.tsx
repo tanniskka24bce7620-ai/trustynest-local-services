@@ -1,27 +1,37 @@
 import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { useAuth, UserRole } from "@/lib/authContext";
+import { useAuth } from "@/lib/authContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Wrench, Users } from "lucide-react";
+import { Wrench, Users, Loader2 } from "lucide-react";
 
 const Login = () => {
   const { role } = useParams<{ role: string }>();
-  const userRole = (role === "provider" ? "provider" : "customer") as UserRole;
   const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const isProvider = role === "provider";
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
-    login(email, password, userRole);
-    navigate("/verify-aadhaar");
+    setLoading(true);
+    setError("");
+    const result = await login(email, password);
+    setLoading(false);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      // Auth state change will update user, then we redirect
+      // We need to wait for the user to be loaded with profile data
+      navigate("/auth-redirect");
+    }
   };
-
-  const isProvider = userRole === "provider";
 
   return (
     <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-4 py-12">
@@ -39,6 +49,10 @@ const Login = () => {
             </p>
           </div>
 
+          {error && (
+            <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
@@ -48,7 +62,10 @@ const Login = () => {
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
-            <Button type="submit" className="w-full" size="lg">Sign In</Button>
+            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Sign In
+            </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">

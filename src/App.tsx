@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import VerifyAadhaar from "./pages/VerifyAadhaar";
+import AuthRedirect from "./pages/AuthRedirect";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import About from "./pages/About";
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/login/:role" element={<Login />} />
             <Route path="/signup/:role" element={<Signup />} />
             <Route path="/verify-aadhaar" element={<VerifyAadhaar />} />
+            <Route path="/auth-redirect" element={<AuthRedirect />} />
             <Route path="/provider-dashboard" element={<ProviderDashboard />} />
             <Route path="/customer-dashboard" element={<CustomerDashboard />} />
             <Route path="/about" element={<About />} />

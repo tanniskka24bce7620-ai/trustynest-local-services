@@ -15,6 +15,11 @@ const Navbar = () => {
     { to: "/contact", label: "Contact" },
   ];
 
+  const handleLogout = async () => {
+    await logout();
+    setMobileOpen(false);
+  };
+
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
@@ -43,7 +48,7 @@ const Navbar = () => {
               <Link to={user.role === "provider" ? "/provider-dashboard" : "/customer-dashboard"}>
                 <Button size="sm">Dashboard</Button>
               </Link>
-              <Button variant="ghost" size="sm" onClick={logout}>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="mr-1 h-4 w-4" /> Logout
               </Button>
             </div>
@@ -79,7 +84,7 @@ const Navbar = () => {
                 <Link to={user.role === "provider" ? "/provider-dashboard" : "/customer-dashboard"} onClick={() => setMobileOpen(false)}>
                   <Button size="sm" className="w-full">Dashboard</Button>
                 </Link>
-                <Button variant="ghost" size="sm" onClick={() => { logout(); setMobileOpen(false); }}>
+                <Button variant="ghost" size="sm" onClick={handleLogout}>
                   <LogOut className="mr-1 h-4 w-4" /> Logout
                 </Button>
               </>

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { ServiceProvider, Review, SERVICE_ICONS } from "@/lib/mockData";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/authContext";
 import { Star, MapPin, Clock, CheckCircle, Phone, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -13,23 +14,36 @@ interface Props {
 }
 
 const ProviderProfile = ({ provider, onClose }: Props) => {
+  const { user } = useAuth();
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [reviews, setReviews] = useState<Review[]>(provider.reviews);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (rating === 0 || !reviewText.trim()) return;
-    const newReview: Review = {
-      id: `r${Date.now()}`,
-      customerName: "You",
+    if (rating === 0 || !reviewText.trim() || !user) return;
+
+    // Save to database
+    const { data, error } = await supabase.from("reviews").insert({
+      service_profile_id: provider.id,
+      customer_id: user.id,
       rating,
       comment: reviewText,
-      date: new Date().toISOString().slice(0, 10),
-    };
-    setReviews([newReview, ...reviews]);
+    } as any).select().maybeSingle();
+
+    if (!error && data) {
+      const newReview: Review = {
+        id: (data as any).id,
+        customerName: user.name || "You",
+        rating,
+        comment: reviewText,
+        date: new Date().toISOString().slice(0, 10),
+      };
+      setReviews([newReview, ...reviews]);
+    }
+
     setSubmitted(true);
     setReviewText("");
     setRating(0);
@@ -95,7 +109,7 @@ const ProviderProfile = ({ provider, onClose }: Props) => {
         <div className="mt-6 border-t border-border pt-4">
           <h4 className="mb-3 font-semibold">Reviews</h4>
 
-          {!submitted && (
+          {!submitted && user && (
             <form onSubmit={handleSubmitReview} className="mb-4 space-y-3 rounded-lg border border-border p-4">
               <Label>Your Rating</Label>
               <div className="flex gap-1">

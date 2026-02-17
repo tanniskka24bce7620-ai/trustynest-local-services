@@ -7,15 +7,23 @@ import { Label } from "@/components/ui/label";
 import { Shield, CheckCircle, Loader2 } from "lucide-react";
 
 const VerifyAadhaar = () => {
-  const { user, verifyAadhaar } = useAuth();
+  const { user, loading: authLoading, verifyAadhaar } = useAuth();
   const navigate = useNavigate();
   const [aadhaar, setAadhaar] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"aadhaar" | "otp" | "verified">("aadhaar");
   const [loading, setLoading] = useState(false);
 
+  if (authLoading) return null;
+
   if (!user) {
     navigate("/");
+    return null;
+  }
+
+  // If already verified, skip to dashboard
+  if (user.aadhaarVerified) {
+    navigate(user.role === "provider" ? "/provider-dashboard" : "/customer-dashboard");
     return null;
   }
 
@@ -29,13 +37,13 @@ const VerifyAadhaar = () => {
     }, 1500);
   };
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.length !== 6) return;
     setLoading(true);
-    setTimeout(() => {
+    setTimeout(async () => {
+      await verifyAadhaar();
       setLoading(false);
-      verifyAadhaar();
       setStep("verified");
     }, 2000);
   };
