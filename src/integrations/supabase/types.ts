@@ -14,6 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          booking_code: string
+          booking_date: string
+          cancellation_reason: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          provider_user_id: string
+          service_note: string | null
+          service_profile_id: string
+          status: string
+          time_slot: string
+          updated_at: string
+        }
+        Insert: {
+          booking_code?: string
+          booking_date: string
+          cancellation_reason?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          provider_user_id: string
+          service_note?: string | null
+          service_profile_id: string
+          status?: string
+          time_slot: string
+          updated_at?: string
+        }
+        Update: {
+          booking_code?: string
+          booking_date?: string
+          cancellation_reason?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          provider_user_id?: string
+          service_note?: string | null
+          service_profile_id?: string
+          status?: string
+          time_slot?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_service_profile_id_fkey"
+            columns: ["service_profile_id"]
+            isOneToOne: false
+            referencedRelation: "service_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           aadhaar_verified: boolean
@@ -55,6 +108,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      provider_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_hour: number
+          id: string
+          is_available: boolean
+          service_profile_id: string
+          slot_duration_minutes: number
+          start_hour: number
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_hour?: number
+          id?: string
+          is_available?: boolean
+          service_profile_id: string
+          slot_duration_minutes?: number
+          start_hour?: number
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_hour?: number
+          id?: string
+          is_available?: boolean
+          service_profile_id?: string
+          slot_duration_minutes?: number
+          start_hour?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_availability_service_profile_id_fkey"
+            columns: ["service_profile_id"]
+            isOneToOne: false
+            referencedRelation: "service_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {

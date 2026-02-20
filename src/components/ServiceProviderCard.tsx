@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { ServiceProvider, SERVICE_ICONS } from "@/lib/mockData";
 import { Star, MapPin, Clock, CheckCircle, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const ServiceProviderCard = ({ provider, onViewProfile }: Props) => {
+  const navigate = useNavigate();
   return (
     <div className="group rounded-xl border border-border bg-card p-5 shadow-soft transition-all hover:shadow-card">
       <div className="flex gap-4">
@@ -53,7 +55,7 @@ const ServiceProviderCard = ({ provider, onViewProfile }: Props) => {
       <p className="mt-3 text-sm text-muted-foreground line-clamp-2">{provider.bio}</p>
 
       <div className="mt-4 flex items-center gap-2">
-        <Button size="sm" className="flex-1" onClick={() => onViewProfile(provider)}>
+        <Button size="sm" className="flex-1" onClick={() => navigate(`/book?sp=${provider.id}`)}>
           Book Service
         </Button>
         <Button size="sm" variant="outline" onClick={() => onViewProfile(provider)}>

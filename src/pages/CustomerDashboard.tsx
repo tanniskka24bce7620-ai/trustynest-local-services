@@ -5,11 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { SERVICE_TYPES, SERVICE_ICONS, ServiceProvider } from "@/lib/mockData";
 import ServiceProviderCard from "@/components/ServiceProviderCard";
 import ProviderProfile from "@/components/ProviderProfile";
+import BookingStatusTracker from "@/components/BookingStatusTracker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal, CheckCircle, Loader2 } from "lucide-react";
+import { Search, SlidersHorizontal, CheckCircle, Loader2, CalendarIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const CustomerDashboard = () => {
   const { user, loading: authLoading, refreshUser } = useAuth();
@@ -187,66 +189,78 @@ const CustomerDashboard = () => {
         </div>
       </div>
 
-      {/* Search & Filters */}
-      <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-soft">
-        <div className="flex items-center gap-2 mb-4">
-          <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Search & Filter</span>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search by name, service, location..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
-          </div>
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {SERVICE_TYPES.map((s) => (
-                <SelectItem key={s} value={s}>{s}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={ratingFilter} onValueChange={setRatingFilter}>
-            <SelectTrigger><SelectValue placeholder="Rating" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Ratings</SelectItem>
-              <SelectItem value="4">4★ & above</SelectItem>
-              <SelectItem value="3">3★ & above</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger><SelectValue placeholder="Sort by" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="rating">Highest Rating</SelectItem>
-              <SelectItem value="reviews">Most Reviews</SelectItem>
-              <SelectItem value="experience">Most Experience</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      <Tabs defaultValue="browse" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="browse"><Search className="h-4 w-4 mr-1" /> Browse</TabsTrigger>
+          <TabsTrigger value="bookings"><CalendarIcon className="h-4 w-4 mr-1" /> My Bookings</TabsTrigger>
+        </TabsList>
 
-      {loadingProviders ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <>
-          <p className="mb-4 text-sm text-muted-foreground">{filtered.length} service providers found</p>
-          <div className="grid gap-4 md:grid-cols-2">
-            {filtered.map((p) => (
-              <ServiceProviderCard key={p.id} provider={p} onViewProfile={setSelectedProvider} />
-            ))}
-          </div>
+        <TabsContent value="bookings">
+          <BookingStatusTracker />
+        </TabsContent>
 
-          {filtered.length === 0 && (
-            <div className="py-16 text-center text-muted-foreground">
-              <p className="text-lg">No service providers found.</p>
-              <p className="text-sm">Try adjusting your filters or check back later.</p>
+        <TabsContent value="browse">
+          {/* Search & Filters */}
+          <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-soft">
+            <div className="flex items-center gap-2 mb-4">
+              <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Search & Filter</span>
             </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input placeholder="Search by name, service, location..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+              </div>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {SERVICE_TYPES.map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={ratingFilter} onValueChange={setRatingFilter}>
+                <SelectTrigger><SelectValue placeholder="Rating" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Ratings</SelectItem>
+                  <SelectItem value="4">4★ & above</SelectItem>
+                  <SelectItem value="3">3★ & above</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger><SelectValue placeholder="Sort by" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rating">Highest Rating</SelectItem>
+                  <SelectItem value="reviews">Most Reviews</SelectItem>
+                  <SelectItem value="experience">Most Experience</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {loadingProviders ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <>
+              <p className="mb-4 text-sm text-muted-foreground">{filtered.length} service providers found</p>
+              <div className="grid gap-4 md:grid-cols-2">
+                {filtered.map((p) => (
+                  <ServiceProviderCard key={p.id} provider={p} onViewProfile={setSelectedProvider} />
+                ))}
+              </div>
+              {filtered.length === 0 && (
+                <div className="py-16 text-center text-muted-foreground">
+                  <p className="text-lg">No service providers found.</p>
+                  <p className="text-sm">Try adjusting your filters or check back later.</p>
+                </div>
+              )}
+            </>
           )}
-        </>
-      )}
+        </TabsContent>
+      </Tabs>
 
       {selectedProvider && <ProviderProfile provider={selectedProvider} onClose={() => setSelectedProvider(null)} />}
     </div>
