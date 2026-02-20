@@ -12,6 +12,7 @@ import VerifyAadhaar from "./pages/VerifyAadhaar";
 import AuthRedirect from "./pages/AuthRedirect";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import CustomerDashboard from "./pages/CustomerDashboard";
+import BookingPage from "./pages/BookingPage";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/auth-redirect" element={<AuthRedirect />} />
             <Route path="/provider-dashboard" element={<ProviderDashboard />} />
             <Route path="/customer-dashboard" element={<CustomerDashboard />} />
+            <Route path="/book" element={<BookingPage />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="*" element={<NotFound />} />

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ServiceProvider, Review, SERVICE_ICONS } from "@/lib/mockData";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
@@ -15,6 +16,7 @@ interface Props {
 
 const ProviderProfile = ({ provider, onClose }: Props) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
@@ -102,7 +104,7 @@ const ProviderProfile = ({ provider, onClose }: Props) => {
               <Phone className="mr-2 h-4 w-4" /> Call Now
             </Button>
           </a>
-          <Button className="flex-1 gradient-hero border-0 text-primary-foreground">Book Service</Button>
+          <Button className="flex-1 gradient-hero border-0 text-primary-foreground" onClick={() => { onClose(); navigate(`/book?sp=${provider.id}`); }}>Book Service</Button>
         </div>
 
         {/* Reviews */}
