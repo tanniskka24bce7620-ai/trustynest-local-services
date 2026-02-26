@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const verifyAadhaar = async () => {
     if (!user) return;
-    await supabase.from("profiles").update({ aadhaar_verified: true } as any).eq("user_id", user.id);
+    await supabase.from("profiles").update({ aadhaar_verified: true, aadhaar_verified_at: new Date().toISOString() } as any).eq("user_id", user.id);
     setUser({ ...user, aadhaarVerified: true });
   };
 

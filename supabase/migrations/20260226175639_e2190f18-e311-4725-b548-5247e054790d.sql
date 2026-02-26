@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS aadhaar_verified_at timestamptz DEFAULT NULL;
