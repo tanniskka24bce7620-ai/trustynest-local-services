@@ -4,15 +4,15 @@ import { useAuth } from "@/lib/authContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, CheckCircle, Loader2 } from "lucide-react";
+import { Shield, CheckCircle, Loader2, AlertCircle } from "lucide-react";
 
 const VerifyAadhaar = () => {
   const { user, loading: authLoading, verifyAadhaar } = useAuth();
   const navigate = useNavigate();
   const [aadhaar, setAadhaar] = useState("");
-  const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"aadhaar" | "otp" | "verified">("aadhaar");
+  const [step, setStep] = useState<"aadhaar" | "verifying" | "verified" | "error">("aadhaar");
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   if (authLoading) return null;
 
@@ -21,35 +21,40 @@ const VerifyAadhaar = () => {
     return null;
   }
 
-  // If already verified, skip to dashboard
   if (user.aadhaarVerified) {
     navigate(user.role === "provider" ? "/provider-dashboard" : "/customer-dashboard");
     return null;
   }
 
-  const handleSendOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (aadhaar.replace(/\s/g, "").length !== 12) return;
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setStep("otp");
-    }, 1500);
-  };
-
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp.length !== 6) return;
+    const digits = aadhaar.replace(/\s/g, "");
+    if (digits.length !== 12) return;
+
     setLoading(true);
-    setTimeout(async () => {
-      await verifyAadhaar();
-      setLoading(false);
+    setErrorMessage("");
+    setStep("verifying");
+
+    const { error } = await verifyAadhaar(digits);
+
+    setLoading(false);
+
+    if (error) {
+      setErrorMessage(error);
+      setStep("error");
+    } else {
       setStep("verified");
-    }, 2000);
+    }
   };
 
   const handleContinue = () => {
     navigate(user.role === "provider" ? "/provider-dashboard" : "/customer-dashboard");
+  };
+
+  const handleRetry = () => {
+    setAadhaar("");
+    setErrorMessage("");
+    setStep("aadhaar");
   };
 
   const formatAadhaar = (val: string) => {
@@ -62,25 +67,29 @@ const VerifyAadhaar = () => {
       <div className="w-full max-w-md animate-scale-in">
         <div className="rounded-2xl border border-border bg-card p-8 shadow-card">
           <div className="mb-6 flex flex-col items-center text-center">
-            <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-xl ${step === "verified" ? "gradient-success" : "gradient-hero"}`}>
+            <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-xl ${step === "verified" ? "gradient-success" : step === "error" ? "bg-destructive" : "gradient-hero"}`}>
               {step === "verified" ? (
                 <CheckCircle className="h-7 w-7 text-primary-foreground" />
+              ) : step === "error" ? (
+                <AlertCircle className="h-7 w-7 text-destructive-foreground" />
               ) : (
                 <Shield className="h-7 w-7 text-primary-foreground" />
               )}
             </div>
             <h1 className="text-2xl font-bold">
-              {step === "verified" ? "Verification Complete!" : "Aadhaar Verification"}
+              {step === "verified" ? "Verification Complete!" : step === "error" ? "Verification Failed" : "Aadhaar Verification"}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {step === "verified"
                 ? "Your identity has been verified successfully."
-                : "Verify your identity to build trust on ServNest"}
+                : step === "error"
+                  ? errorMessage
+                  : "Verify your identity to build trust on ServNest"}
             </p>
           </div>
 
-          {step === "aadhaar" && (
-            <form onSubmit={handleSendOtp} className="space-y-4">
+          {(step === "aadhaar" || step === "verifying") && (
+            <form onSubmit={handleVerify} className="space-y-4">
               <div>
                 <Label htmlFor="aadhaar">Aadhaar Number</Label>
                 <Input
@@ -90,37 +99,23 @@ const VerifyAadhaar = () => {
                   onChange={(e) => setAadhaar(formatAadhaar(e.target.value))}
                   maxLength={14}
                   required
+                  disabled={loading}
                 />
                 <p className="mt-1 text-xs text-muted-foreground">Enter your 12-digit Aadhaar number</p>
               </div>
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+              <Button type="submit" className="w-full" size="lg" disabled={loading || aadhaar.replace(/\s/g, "").length !== 12}>
                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Send OTP
+                {loading ? "Verifying..." : "Verify Aadhaar"}
               </Button>
             </form>
           )}
 
-          {step === "otp" && (
-            <form onSubmit={handleVerify} className="space-y-4">
-              <div className="rounded-lg bg-muted p-3 text-center text-sm text-muted-foreground">
-                OTP sent to mobile linked with Aadhaar ****{aadhaar.replace(/\s/g, "").slice(-4)}
-              </div>
-              <div>
-                <Label htmlFor="otp">Enter OTP</Label>
-                <Input
-                  id="otp"
-                  placeholder="6-digit OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  maxLength={6}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Verify
+          {step === "error" && (
+            <div className="space-y-4 text-center">
+              <Button onClick={handleRetry} className="w-full" size="lg">
+                Try Again
               </Button>
-            </form>
+            </div>
           )}
 
           {step === "verified" && (

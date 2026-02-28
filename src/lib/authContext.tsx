@@ -19,21 +19,19 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ error: string | null }>;
   signup: (name: string, email: string, password: string, role: UserRole) => Promise<{ error: string | null }>;
   logout: () => Promise<void>;
-  verifyAadhaar: () => Promise<void>;
+  verifyAadhaar: (aadhaarNumber: string) => Promise<{ error: string | null }>;
   refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 async function buildAuthUser(supaUser: User): Promise<AuthUser | null> {
-  // Fetch profile
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("user_id", supaUser.id)
     .maybeSingle();
 
-  // Fetch role
   const { data: roleData } = await supabase
     .from("user_roles")
     .select("role")
@@ -99,10 +97,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     if (error) return { error: error.message };
 
-    // Assign role
     if (data.user && role) {
       await supabase.from("user_roles").insert({ user_id: data.user.id, role } as any);
-      // Update profile name
       await supabase.from("profiles").update({ name } as any).eq("user_id", data.user.id);
     }
 
@@ -114,10 +110,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
-  const verifyAadhaar = async () => {
-    if (!user) return;
-    await supabase.from("profiles").update({ aadhaar_verified: true, aadhaar_verified_at: new Date().toISOString() } as any).eq("user_id", user.id);
-    setUser({ ...user, aadhaarVerified: true });
+  const verifyAadhaar = async (aadhaarNumber: string): Promise<{ error: string | null }> => {
+    if (!user) return { error: "Not authenticated" };
+
+    const { data, error } = await supabase.functions.invoke("verify-aadhaar", {
+      body: { aadhaar_number: aadhaarNumber },
+    });
+
+    if (error) {
+      return { error: error.message || "Verification failed" };
+    }
+
+    if (data?.error) {
+      return { error: data.error };
+    }
+
+    // Refresh user state from database
+    await refreshUser();
+    return { error: null };
   };
 
   return (
