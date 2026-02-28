@@ -69,6 +69,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          aadhaar_hash: string | null
           aadhaar_verified: boolean
           aadhaar_verified_at: string | null
           area: string | null
@@ -83,6 +84,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          aadhaar_hash?: string | null
           aadhaar_verified?: boolean
           aadhaar_verified_at?: string | null
           area?: string | null
@@ -97,6 +99,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          aadhaar_hash?: string | null
           aadhaar_verified?: boolean
           aadhaar_verified_at?: string | null
           area?: string | null
