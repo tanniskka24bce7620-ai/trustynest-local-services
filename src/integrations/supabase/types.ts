@@ -77,6 +77,7 @@ export type Database = {
           contact: string | null
           created_at: string
           id: string
+          language: string | null
           name: string
           photo_url: string | null
           profile_complete: boolean
@@ -92,6 +93,7 @@ export type Database = {
           contact?: string | null
           created_at?: string
           id?: string
+          language?: string | null
           name?: string
           photo_url?: string | null
           profile_complete?: boolean
@@ -107,6 +109,7 @@ export type Database = {
           contact?: string | null
           created_at?: string
           id?: string
+          language?: string | null
           name?: string
           photo_url?: string | null
           profile_complete?: boolean
