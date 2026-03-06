@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/authContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Wrench, Users, Loader2 } from "lucide-react";
 
 const Login = () => {
+  const { t } = useTranslation();
   const { role } = useParams<{ role: string }>();
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -27,8 +29,6 @@ const Login = () => {
     if (result.error) {
       setError(result.error);
     } else {
-      // Auth state change will update user, then we redirect
-      // We need to wait for the user to be loaded with profile data
       navigate("/auth-redirect");
     }
   };
@@ -42,10 +42,10 @@ const Login = () => {
               {isProvider ? <Wrench className="h-7 w-7 text-primary-foreground" /> : <Users className="h-7 w-7 text-primary-foreground" />}
             </div>
             <h1 className="text-2xl font-bold">
-              {isProvider ? "Service Provider" : "Customer"} Login
+              {isProvider ? t("auth.loginAsProvider") : t("auth.loginAsCustomer")}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Sign in to your {isProvider ? "provider" : "customer"} account
+              {t("auth.signInTo", { role: isProvider ? t("auth.provider") : t("auth.customer") })}
             </p>
           </div>
 
@@ -55,29 +55,29 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Label htmlFor="email">{t("auth.email")}</Label>
+              <Input id="email" type="email" placeholder={t("auth.emailPlaceholder")} value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div>
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Label htmlFor="password">{t("auth.password")}</Label>
+              <Input id="password" type="password" placeholder={t("auth.passwordPlaceholder")} value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In
+              {t("auth.signIn")}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Don't have an account?{" "}
+            {t("auth.noAccount")}{" "}
             <Link to={`/signup/${role}`} className="font-medium text-primary hover:underline">
-              Sign Up
+              {t("auth.signup")}
             </Link>
           </p>
 
           <div className="mt-4 text-center">
             <Link to={`/login/${isProvider ? "customer" : "provider"}`} className="text-xs text-muted-foreground hover:text-primary">
-              Login as {isProvider ? "Customer" : "Service Provider"} instead →
+              {t("auth.loginAsOther", { role: isProvider ? t("auth.customer") : t("auth.serviceProvider") })}
             </Link>
           </div>
         </div>

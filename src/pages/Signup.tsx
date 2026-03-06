@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth, UserRole } from "@/lib/authContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Wrench, Users, Loader2 } from "lucide-react";
 
 const Signup = () => {
+  const { t } = useTranslation();
   const { role } = useParams<{ role: string }>();
   const userRole = (role === "provider" ? "provider" : "customer") as UserRole;
   const { signup } = useAuth();
@@ -41,8 +43,8 @@ const Signup = () => {
             <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-xl ${isProvider ? "gradient-hero" : "gradient-success"}`}>
               {isProvider ? <Wrench className="h-7 w-7 text-primary-foreground" /> : <Users className="h-7 w-7 text-primary-foreground" />}
             </div>
-            <h1 className="text-2xl font-bold">Create {isProvider ? "Provider" : "Customer"} Account</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Join ServNest today</p>
+            <h1 className="text-2xl font-bold">{t("auth.createRole", { role: isProvider ? t("auth.serviceProvider") : t("auth.customer") })}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t("auth.joinToday")}</p>
           </div>
 
           {error && (
@@ -51,27 +53,27 @@ const Signup = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="name">Full Name</Label>
-              <Input id="name" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required />
+              <Label htmlFor="name">{t("auth.fullName")}</Label>
+              <Input id="name" placeholder={t("auth.namePlaceholder")} value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Label htmlFor="email">{t("auth.email")}</Label>
+              <Input id="email" type="email" placeholder={t("auth.emailPlaceholder")} value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div>
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Label htmlFor="password">{t("auth.password")}</Label>
+              <Input id="password" type="password" placeholder={t("auth.passwordPlaceholder")} value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Account
+              {t("auth.createAccount")}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
+            {t("auth.haveAccount")}{" "}
             <Link to={`/login/${role}`} className="font-medium text-primary hover:underline">
-              Sign In
+              {t("auth.signIn")}
             </Link>
           </p>
         </div>

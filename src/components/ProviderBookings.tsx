@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { Badge } from "@/components/ui/badge";
@@ -14,52 +15,31 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 interface Booking {
-  id: string;
-  booking_code: string;
-  booking_date: string;
-  time_slot: string;
-  status: string;
-  service_note: string;
-  customer_name: string;
+  id: string; booking_code: string; booking_date: string; time_slot: string;
+  status: string; service_note: string; customer_name: string;
 }
 
 const ProviderBookings = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) return;
-    loadBookings();
-  }, [user]);
+  useEffect(() => { if (user) loadBookings(); }, [user]);
 
   const loadBookings = async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase
-      .from("bookings")
-      .select("*")
-      .eq("provider_user_id", user.id)
-      .order("booking_date", { ascending: true });
-
-    if (!data || (data as any[]).length === 0) {
-      setBookings([]);
-      setLoading(false);
-      return;
-    }
+    const { data } = await supabase.from("bookings").select("*").eq("provider_user_id", user.id).order("booking_date", { ascending: true });
+    if (!data || (data as any[]).length === 0) { setBookings([]); setLoading(false); return; }
 
     const customerIds = [...new Set((data as any[]).map((b: any) => b.customer_id))];
     const { data: profiles } = await supabase.from("profiles").select("user_id, name").in("user_id", customerIds);
     const profileMap = new Map((profiles as any[] || []).map((p: any) => [p.user_id, p]));
 
     const mapped: Booking[] = (data as any[]).map((b: any) => ({
-      id: b.id,
-      booking_code: b.booking_code,
-      booking_date: b.booking_date,
-      time_slot: b.time_slot,
-      status: b.status,
-      service_note: b.service_note,
-      customer_name: profileMap.get(b.customer_id)?.name || "Customer",
+      id: b.id, booking_code: b.booking_code, booking_date: b.booking_date, time_slot: b.time_slot,
+      status: b.status, service_note: b.service_note, customer_name: profileMap.get(b.customer_id)?.name || "Customer",
     }));
     setBookings(mapped);
     setLoading(false);
@@ -71,10 +51,7 @@ const ProviderBookings = () => {
   };
 
   if (loading) return <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto my-8" />;
-
-  if (bookings.length === 0) return (
-    <p className="py-8 text-center text-muted-foreground">No bookings yet. Your bookings will appear here once customers book your services.</p>
-  );
+  if (bookings.length === 0) return <p className="py-8 text-center text-muted-foreground">{t("providerBookings.noBookings")}</p>;
 
   return (
     <div className="space-y-3">
@@ -97,16 +74,16 @@ const ProviderBookings = () => {
               {b.status === "pending" && (
                 <>
                   <Button size="sm" variant="outline" className="text-success border-success/30" onClick={() => updateStatus(b.id, "confirmed")}>
-                    <Check className="h-3 w-3 mr-1" /> Accept
+                    <Check className="h-3 w-3 mr-1" /> {t("providerBookings.accept")}
                   </Button>
                   <Button size="sm" variant="ghost" className="text-destructive" onClick={() => updateStatus(b.id, "cancelled")}>
-                    <X className="h-3 w-3 mr-1" /> Decline
+                    <X className="h-3 w-3 mr-1" /> {t("providerBookings.decline")}
                   </Button>
                 </>
               )}
               {b.status === "confirmed" && (
                 <Button size="sm" variant="outline" className="text-success border-success/30" onClick={() => updateStatus(b.id, "completed")}>
-                  <Check className="h-3 w-3 mr-1" /> Complete
+                  <Check className="h-3 w-3 mr-1" /> {t("providerBookings.complete")}
                 </Button>
               )}
             </div>

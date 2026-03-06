@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import i18n from "@/i18n/config";
+import { SUPPORTED_LANGUAGES } from "@/i18n/config";
 
 export type UserRole = "provider" | "customer" | null;
 
@@ -37,6 +39,14 @@ async function buildAuthUser(supaUser: User): Promise<AuthUser | null> {
     .select("role")
     .eq("user_id", supaUser.id)
     .maybeSingle();
+
+  // Apply saved language preference
+  const savedLang = (profile as any)?.language;
+  if (savedLang && savedLang !== i18n.language) {
+    i18n.changeLanguage(savedLang);
+    const langConfig = SUPPORTED_LANGUAGES.find((l) => l.code === savedLang);
+    if (langConfig) document.documentElement.dir = langConfig.dir;
+  }
 
   return {
     id: supaUser.id,
