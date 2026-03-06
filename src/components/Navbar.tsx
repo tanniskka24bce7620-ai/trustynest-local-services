@@ -1,18 +1,21 @@
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/authContext";
 import { Button } from "@/components/ui/button";
 import { LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
+import LanguageSelector from "@/components/LanguageSelector";
 
 const Navbar = () => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
-    { to: "/", label: "Home" },
-    { to: "/about", label: "About" },
-    { to: "/contact", label: "Contact" },
+    { to: "/", label: t("nav.home") },
+    { to: "/about", label: t("nav.about") },
+    { to: "/contact", label: t("nav.contact") },
   ];
 
   const handleLogout = async () => {
@@ -43,18 +46,19 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
+          <LanguageSelector />
           {user ? (
             <div className="flex items-center gap-3">
               <Link to={user.role === "provider" ? "/provider-dashboard" : "/customer-dashboard"}>
-                <Button size="sm">Dashboard</Button>
+                <Button size="sm">{t("nav.dashboard")}</Button>
               </Link>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
-                <LogOut className="mr-1 h-4 w-4" /> Logout
+                <LogOut className="mr-1 h-4 w-4" /> {t("nav.logout")}
               </Button>
             </div>
           ) : (
             <Link to="/login/customer">
-              <Button size="sm">Get Started</Button>
+              <Button size="sm">{t("nav.getStarted")}</Button>
             </Link>
           )}
         </div>
@@ -79,18 +83,19 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+            <LanguageSelector />
             {user ? (
               <>
                 <Link to={user.role === "provider" ? "/provider-dashboard" : "/customer-dashboard"} onClick={() => setMobileOpen(false)}>
-                  <Button size="sm" className="w-full">Dashboard</Button>
+                  <Button size="sm" className="w-full">{t("nav.dashboard")}</Button>
                 </Link>
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
-                  <LogOut className="mr-1 h-4 w-4" /> Logout
+                  <LogOut className="mr-1 h-4 w-4" /> {t("nav.logout")}
                 </Button>
               </>
             ) : (
               <Link to="/login/customer" onClick={() => setMobileOpen(false)}>
-                <Button size="sm" className="w-full">Get Started</Button>
+                <Button size="sm" className="w-full">{t("nav.getStarted")}</Button>
               </Link>
             )}
           </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/authContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Shield, CheckCircle, Loader2, AlertCircle } from "lucide-react";
 
 const VerifyAadhaar = () => {
+  const { t } = useTranslation();
   const { user, loading: authLoading, verifyAadhaar } = useAuth();
   const navigate = useNavigate();
   const [aadhaar, setAadhaar] = useState("");
@@ -15,12 +17,7 @@ const VerifyAadhaar = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   if (authLoading) return null;
-
-  if (!user) {
-    navigate("/");
-    return null;
-  }
-
+  if (!user) { navigate("/"); return null; }
   if (user.aadhaarVerified) {
     navigate(user.role === "provider" ? "/provider-dashboard" : "/customer-dashboard");
     return null;
@@ -30,31 +27,17 @@ const VerifyAadhaar = () => {
     e.preventDefault();
     const digits = aadhaar.replace(/\s/g, "");
     if (digits.length !== 12) return;
-
     setLoading(true);
     setErrorMessage("");
     setStep("verifying");
-
     const { error } = await verifyAadhaar(digits);
-
     setLoading(false);
-
-    if (error) {
-      setErrorMessage(error);
-      setStep("error");
-    } else {
-      setStep("verified");
-    }
+    if (error) { setErrorMessage(error); setStep("error"); }
+    else setStep("verified");
   };
 
   const handleContinue = () => {
     navigate(user.role === "provider" ? "/provider-dashboard" : "/customer-dashboard");
-  };
-
-  const handleRetry = () => {
-    setAadhaar("");
-    setErrorMessage("");
-    setStep("aadhaar");
   };
 
   const formatAadhaar = (val: string) => {
@@ -68,52 +51,34 @@ const VerifyAadhaar = () => {
         <div className="rounded-2xl border border-border bg-card p-8 shadow-card">
           <div className="mb-6 flex flex-col items-center text-center">
             <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-xl ${step === "verified" ? "gradient-success" : step === "error" ? "bg-destructive" : "gradient-hero"}`}>
-              {step === "verified" ? (
-                <CheckCircle className="h-7 w-7 text-primary-foreground" />
-              ) : step === "error" ? (
-                <AlertCircle className="h-7 w-7 text-destructive-foreground" />
-              ) : (
-                <Shield className="h-7 w-7 text-primary-foreground" />
-              )}
+              {step === "verified" ? <CheckCircle className="h-7 w-7 text-primary-foreground" /> : step === "error" ? <AlertCircle className="h-7 w-7 text-destructive-foreground" /> : <Shield className="h-7 w-7 text-primary-foreground" />}
             </div>
             <h1 className="text-2xl font-bold">
-              {step === "verified" ? "Verification Complete!" : step === "error" ? "Verification Failed" : "Aadhaar Verification"}
+              {step === "verified" ? t("aadhaar.verifiedTitle") : step === "error" ? t("aadhaar.failedTitle") : t("aadhaar.title")}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {step === "verified"
-                ? "Your identity has been verified successfully."
-                : step === "error"
-                  ? errorMessage
-                  : "Verify your identity to build trust on ServNest"}
+              {step === "verified" ? t("aadhaar.verifiedSubtitle") : step === "error" ? errorMessage : t("aadhaar.subtitle")}
             </p>
           </div>
 
           {(step === "aadhaar" || step === "verifying") && (
             <form onSubmit={handleVerify} className="space-y-4">
               <div>
-                <Label htmlFor="aadhaar">Aadhaar Number</Label>
-                <Input
-                  id="aadhaar"
-                  placeholder="XXXX XXXX XXXX"
-                  value={aadhaar}
-                  onChange={(e) => setAadhaar(formatAadhaar(e.target.value))}
-                  maxLength={14}
-                  required
-                  disabled={loading}
-                />
-                <p className="mt-1 text-xs text-muted-foreground">Enter your 12-digit Aadhaar number</p>
+                <Label htmlFor="aadhaar">{t("aadhaar.label")}</Label>
+                <Input id="aadhaar" placeholder={t("aadhaar.placeholder")} value={aadhaar} onChange={(e) => setAadhaar(formatAadhaar(e.target.value))} maxLength={14} required disabled={loading} />
+                <p className="mt-1 text-xs text-muted-foreground">{t("aadhaar.hint")}</p>
               </div>
               <Button type="submit" className="w-full" size="lg" disabled={loading || aadhaar.replace(/\s/g, "").length !== 12}>
                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {loading ? "Verifying..." : "Verify Aadhaar"}
+                {loading ? t("aadhaar.verifying") : t("aadhaar.verify")}
               </Button>
             </form>
           )}
 
           {step === "error" && (
             <div className="space-y-4 text-center">
-              <Button onClick={handleRetry} className="w-full" size="lg">
-                Try Again
+              <Button onClick={() => { setAadhaar(""); setErrorMessage(""); setStep("aadhaar"); }} className="w-full" size="lg">
+                {t("aadhaar.tryAgain")}
               </Button>
             </div>
           )}
@@ -121,10 +86,10 @@ const VerifyAadhaar = () => {
           {step === "verified" && (
             <div className="space-y-4 text-center">
               <div className="inline-flex items-center gap-2 rounded-full bg-success/10 px-4 py-2 text-sm font-medium text-success">
-                <CheckCircle className="h-4 w-4" /> Aadhaar Verified
+                <CheckCircle className="h-4 w-4" /> {t("aadhaar.verified")}
               </div>
               <Button onClick={handleContinue} className="w-full" size="lg">
-                Continue to Dashboard
+                {t("aadhaar.continue")}
               </Button>
             </div>
           )}
