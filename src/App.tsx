@@ -8,6 +8,8 @@ import Navbar from "@/components/Navbar";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import VerifyAadhaar from "./pages/VerifyAadhaar";
 import AuthRedirect from "./pages/AuthRedirect";
 import ProviderDashboard from "./pages/ProviderDashboard";
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login/:role" element={<Login />} />
             <Route path="/signup/:role" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-aadhaar" element={<VerifyAadhaar />} />
             <Route path="/auth-redirect" element={<AuthRedirect />} />
             <Route path="/provider-dashboard" element={<ProviderDashboard />} />

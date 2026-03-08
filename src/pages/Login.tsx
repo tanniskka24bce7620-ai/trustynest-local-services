@@ -61,6 +61,11 @@ const Login = () => {
             <div>
               <Label htmlFor="password">{t("auth.password")}</Label>
               <Input id="password" type="password" placeholder={t("auth.passwordPlaceholder")} value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <div className="mt-1 text-right">
+                <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-primary">
+                  {t("auth.forgotPassword")}
+                </Link>
+              </div>
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
