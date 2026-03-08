@@ -324,8 +324,19 @@ const CustomerDashboard = () => {
             </Suspense>
           ) : (
             <>
+              {/* Emergency Providers section */}
+              {emergencyMode && filtered.length > 0 && (
+                <div className="mb-6">
+                  <div className="mb-3 flex items-center gap-2">
+                    <Siren className="h-5 w-5 text-destructive" />
+                    <h2 className="text-lg font-semibold">{t("emergency.sectionTitle")}</h2>
+                    <Badge variant="outline" className="text-xs border-destructive/30 bg-destructive/10 text-destructive">{t("emergency.priority")}</Badge>
+                  </div>
+                </div>
+              )}
+
               {/* Near You section */}
-              {nearbyProviders.length > 0 && (
+              {!emergencyMode && nearbyProviders.length > 0 && (
                 <div className="mb-6">
                   <div className="mb-3 flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-primary" />
@@ -342,12 +353,12 @@ const CustomerDashboard = () => {
 
               <p className="mb-4 text-sm text-muted-foreground">{t("customerDashboard.providersFound", { count: filtered.length })}</p>
               <div className="grid gap-4 md:grid-cols-2">
-                {filtered.map((p) => (<ServiceProviderCard key={p.id} provider={p} onViewProfile={setSelectedProvider} />))}
+                {filtered.map((p) => (<ServiceProviderCard key={p.id} provider={p} onViewProfile={setSelectedProvider} emergencyMode={emergencyMode} />))}
               </div>
               {filtered.length === 0 && (
                 <div className="py-16 text-center text-muted-foreground">
-                  <p className="text-lg">{t("customerDashboard.noProviders")}</p>
-                  <p className="text-sm">{t("customerDashboard.noProvidersDesc")}</p>
+                  <p className="text-lg">{emergencyMode ? t("emergency.noProviders") : t("customerDashboard.noProviders")}</p>
+                  <p className="text-sm">{emergencyMode ? t("emergency.noProvidersDesc") : t("customerDashboard.noProvidersDesc")}</p>
                 </div>
               )}
             </>
