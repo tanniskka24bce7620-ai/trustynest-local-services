@@ -86,6 +86,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Image-Based Service Request */}
+      <ImageServiceRequest />
+
       {/* Leaderboard */}
       <LeaderboardSection />
 
