@@ -41,6 +41,7 @@ const CustomerDashboard = () => {
   const [sortBy, setSortBy] = useState<string>("distance");
   const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [emergencyMode, setEmergencyMode] = useState(false);
   const voice = useVoiceSearch();
 
   // Apply voice search results
