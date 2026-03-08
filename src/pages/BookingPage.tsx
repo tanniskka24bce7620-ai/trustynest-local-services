@@ -81,10 +81,16 @@ const BookingPage = () => {
   const handleBook = async () => {
     if (!user || !date || !selectedSlot || !spId || !provider) return;
     setSubmitting(true);
-    const { data, error } = await supabase.from("bookings").insert({
+    const bookingData: any = {
       customer_id: user.id, service_profile_id: spId, provider_user_id: provider.user_id,
       booking_date: format(date, "yyyy-MM-dd"), time_slot: selectedSlot, service_note: note,
-    } as any).select().maybeSingle();
+    };
+    if (isEmergency) {
+      bookingData.is_emergency = true;
+      bookingData.emergency_status = "emergency_pending";
+      bookingData.emergency_requested_at = new Date().toISOString();
+    }
+    const { data, error } = await supabase.from("bookings").insert(bookingData).select().maybeSingle();
     if (!error && data) setConfirmation({ code: (data as any).booking_code, id: (data as any).id });
     setSubmitting(false);
   };
