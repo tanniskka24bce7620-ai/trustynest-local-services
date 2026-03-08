@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Clock, Loader2, Check, X } from "lucide-react";
+import { CalendarIcon, Clock, Loader2, Check, X, Siren } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -17,6 +17,7 @@ const STATUS_STYLES: Record<string, string> = {
 interface Booking {
   id: string; booking_code: string; booking_date: string; time_slot: string;
   status: string; service_note: string; customer_name: string;
+  is_emergency: boolean;
 }
 
 const ProviderBookings = () => {
@@ -30,7 +31,7 @@ const ProviderBookings = () => {
   const loadBookings = async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase.from("bookings").select("*").eq("provider_user_id", user.id).order("booking_date", { ascending: true });
+    const { data } = await supabase.from("bookings").select("*").eq("provider_user_id", user.id).order("is_emergency", { ascending: false }).order("booking_date", { ascending: true });
     if (!data || (data as any[]).length === 0) { setBookings([]); setLoading(false); return; }
 
     const customerIds = [...new Set((data as any[]).map((b: any) => b.customer_id))];
@@ -40,6 +41,7 @@ const ProviderBookings = () => {
     const mapped: Booking[] = (data as any[]).map((b: any) => ({
       id: b.id, booking_code: b.booking_code, booking_date: b.booking_date, time_slot: b.time_slot,
       status: b.status, service_note: b.service_note, customer_name: profileMap.get(b.customer_id)?.name || "Customer",
+      is_emergency: b.is_emergency || false,
     }));
     setBookings(mapped);
     setLoading(false);
@@ -56,10 +58,15 @@ const ProviderBookings = () => {
   return (
     <div className="space-y-3">
       {bookings.map((b) => (
-        <div key={b.id} className="rounded-xl border border-border bg-card p-4 shadow-soft">
+        <div key={b.id} className={`rounded-xl border bg-card p-4 shadow-soft ${b.is_emergency && b.status === "pending" ? "border-destructive/40 ring-1 ring-destructive/20" : "border-border"}`}>
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
+                {b.is_emergency && (
+                  <Badge className="gap-1 bg-destructive/10 text-destructive border-destructive/30 text-xs">
+                    <Siren className="h-3 w-3" /> Emergency
+                  </Badge>
+                )}
                 <span className="font-semibold">{b.customer_name}</span>
                 <Badge className={cn("text-xs", STATUS_STYLES[b.status])}>{b.status}</Badge>
               </div>

@@ -21,7 +21,10 @@ export type Database = {
           cancellation_reason: string | null
           created_at: string
           customer_id: string
+          emergency_requested_at: string | null
+          emergency_status: string | null
           id: string
+          is_emergency: boolean
           provider_user_id: string
           service_note: string | null
           service_profile_id: string
@@ -35,7 +38,10 @@ export type Database = {
           cancellation_reason?: string | null
           created_at?: string
           customer_id: string
+          emergency_requested_at?: string | null
+          emergency_status?: string | null
           id?: string
+          is_emergency?: boolean
           provider_user_id: string
           service_note?: string | null
           service_profile_id: string
@@ -49,7 +55,10 @@ export type Database = {
           cancellation_reason?: string | null
           created_at?: string
           customer_id?: string
+          emergency_requested_at?: string | null
+          emergency_status?: string | null
           id?: string
+          is_emergency?: boolean
           provider_user_id?: string
           service_note?: string | null
           service_profile_id?: string
@@ -238,6 +247,7 @@ export type Database = {
           available: boolean
           bio: string | null
           created_at: string
+          emergency_available: boolean
           experience: number
           id: string
           latitude: number | null
@@ -253,6 +263,7 @@ export type Database = {
           available?: boolean
           bio?: string | null
           created_at?: string
+          emergency_available?: boolean
           experience?: number
           id?: string
           latitude?: number | null
@@ -268,6 +279,7 @@ export type Database = {
           available?: boolean
           bio?: string | null
           created_at?: string
+          emergency_available?: boolean
           experience?: number
           id?: string
           latitude?: number | null

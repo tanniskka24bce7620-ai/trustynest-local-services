@@ -19,6 +19,7 @@ interface Notification {
 
 const TYPE_ICONS: Record<string, string> = {
   new_booking: "📩",
+  emergency_booking: "🚨",
   cancel: "❌",
   confirmed: "✅",
   completed: "🎉",

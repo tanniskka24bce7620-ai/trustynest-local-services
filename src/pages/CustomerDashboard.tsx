@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/authContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { SERVICE_TYPES, SERVICE_ICONS, ServiceProvider } from "@/lib/mockData";
+import { SERVICE_TYPES, SERVICE_ICONS, ServiceProvider, EMERGENCY_SERVICE_TYPES } from "@/lib/mockData";
 import ServiceProviderCard from "@/components/ServiceProviderCard";
 import ProviderProfile from "@/components/ProviderProfile";
 import BookingStatusTracker from "@/components/BookingStatusTracker";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal, CheckCircle, Loader2, CalendarIcon, MapPin, List as ListIcon, Map as MapIcon, Navigation, LocateFixed, Mic, MicOff } from "lucide-react";
+import { Search, SlidersHorizontal, CheckCircle, Loader2, CalendarIcon, MapPin, List as ListIcon, Map as MapIcon, Navigation, LocateFixed, Mic, MicOff, Siren } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGeolocation, getDistanceKm } from "@/hooks/useGeolocation";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +41,7 @@ const CustomerDashboard = () => {
   const [sortBy, setSortBy] = useState<string>("distance");
   const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [emergencyMode, setEmergencyMode] = useState(false);
   const voice = useVoiceSearch();
 
   // Apply voice search results
@@ -104,6 +105,7 @@ const CustomerDashboard = () => {
           bio: sp.bio || "", photo: profile?.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.name || "U")}&background=3b82f6&color=fff`,
           available: sp.available, verified: profile?.aadhaar_verified || false, rating: parseFloat(sp.rating) || 0, reviewCount: sp.review_count || 0,
           latitude: sp.latitude, longitude: sp.longitude,
+          emergencyAvailable: sp.emergency_available || false,
           reviews: reviews.map((r: any) => ({ id: r.id, customerName: "Customer", rating: r.rating, comment: r.comment || "", date: r.created_at?.slice(0, 10) || "" })),
         };
       });
@@ -159,7 +161,8 @@ const CustomerDashboard = () => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.serviceType.toLowerCase().includes(search.toLowerCase()) || p.area.toLowerCase().includes(search.toLowerCase()) || p.city.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = categoryFilter === "all" || p.serviceType === categoryFilter;
     const matchesRating = ratingFilter === "all" || p.rating >= parseFloat(ratingFilter);
-    return matchesSearch && matchesCategory && matchesRating;
+    const matchesEmergency = !emergencyMode || (p.emergencyAvailable && p.available && EMERGENCY_SERVICE_TYPES.includes(p.serviceType) && (p.distance == null || p.distance <= 10));
+    return matchesSearch && matchesCategory && matchesRating && matchesEmergency;
   });
 
   // Sort
@@ -213,6 +216,32 @@ const CustomerDashboard = () => {
         <TabsContent value="bookings"><BookingStatusTracker /></TabsContent>
 
         <TabsContent value="browse">
+          {/* Emergency Mode Toggle */}
+          <div className={`mb-4 flex items-center justify-between rounded-xl border p-4 transition-colors ${emergencyMode ? "border-destructive/40 bg-destructive/5" : "border-border bg-card"}`}>
+            <div className="flex items-center gap-3">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${emergencyMode ? "bg-destructive/10" : "bg-muted"}`}>
+                <Siren className={`h-5 w-5 ${emergencyMode ? "text-destructive animate-pulse" : "text-muted-foreground"}`} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">{t("emergency.toggleTitle")}</p>
+                <p className="text-xs text-muted-foreground">{t("emergency.toggleDesc")}</p>
+              </div>
+            </div>
+            <Button
+              variant={emergencyMode ? "destructive" : "outline"}
+              size="sm"
+              onClick={() => {
+                setEmergencyMode(!emergencyMode);
+                if (!emergencyMode) {
+                  setSortBy("distance");
+                  if (!position) requestLocation();
+                }
+              }}
+            >
+              {emergencyMode ? t("emergency.disable") : t("emergency.enable")}
+            </Button>
+          </div>
+
           {/* Search & Filter bar */}
           <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-soft">
             <div className="flex items-center justify-between mb-4">
@@ -295,8 +324,19 @@ const CustomerDashboard = () => {
             </Suspense>
           ) : (
             <>
+              {/* Emergency Providers section */}
+              {emergencyMode && filtered.length > 0 && (
+                <div className="mb-6">
+                  <div className="mb-3 flex items-center gap-2">
+                    <Siren className="h-5 w-5 text-destructive" />
+                    <h2 className="text-lg font-semibold">{t("emergency.sectionTitle")}</h2>
+                    <Badge variant="outline" className="text-xs border-destructive/30 bg-destructive/10 text-destructive">{t("emergency.priority")}</Badge>
+                  </div>
+                </div>
+              )}
+
               {/* Near You section */}
-              {nearbyProviders.length > 0 && (
+              {!emergencyMode && nearbyProviders.length > 0 && (
                 <div className="mb-6">
                   <div className="mb-3 flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-primary" />
@@ -313,12 +353,12 @@ const CustomerDashboard = () => {
 
               <p className="mb-4 text-sm text-muted-foreground">{t("customerDashboard.providersFound", { count: filtered.length })}</p>
               <div className="grid gap-4 md:grid-cols-2">
-                {filtered.map((p) => (<ServiceProviderCard key={p.id} provider={p} onViewProfile={setSelectedProvider} />))}
+                {filtered.map((p) => (<ServiceProviderCard key={p.id} provider={p} onViewProfile={setSelectedProvider} emergencyMode={emergencyMode} />))}
               </div>
               {filtered.length === 0 && (
                 <div className="py-16 text-center text-muted-foreground">
-                  <p className="text-lg">{t("customerDashboard.noProviders")}</p>
-                  <p className="text-sm">{t("customerDashboard.noProvidersDesc")}</p>
+                  <p className="text-lg">{emergencyMode ? t("emergency.noProviders") : t("customerDashboard.noProviders")}</p>
+                  <p className="text-sm">{emergencyMode ? t("emergency.noProvidersDesc") : t("customerDashboard.noProvidersDesc")}</p>
                 </div>
               )}
             </>

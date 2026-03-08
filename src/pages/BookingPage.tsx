@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, CheckCircle, ArrowLeft, CalendarIcon, Clock, Loader2, PartyPopper } from "lucide-react";
+import { Star, MapPin, CheckCircle, ArrowLeft, CalendarIcon, Clock, Loader2, PartyPopper, Siren } from "lucide-react";
 import { format, addDays, isBefore, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +35,7 @@ const BookingPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const spId = searchParams.get("sp");
+  const isEmergency = searchParams.get("emergency") === "true";
 
   const [provider, setProvider] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -80,10 +81,16 @@ const BookingPage = () => {
   const handleBook = async () => {
     if (!user || !date || !selectedSlot || !spId || !provider) return;
     setSubmitting(true);
-    const { data, error } = await supabase.from("bookings").insert({
+    const bookingData: any = {
       customer_id: user.id, service_profile_id: spId, provider_user_id: provider.user_id,
       booking_date: format(date, "yyyy-MM-dd"), time_slot: selectedSlot, service_note: note,
-    } as any).select().maybeSingle();
+    };
+    if (isEmergency) {
+      bookingData.is_emergency = true;
+      bookingData.emergency_status = "emergency_pending";
+      bookingData.emergency_requested_at = new Date().toISOString();
+    }
+    const { data, error } = await supabase.from("bookings").insert(bookingData).select().maybeSingle();
     if (!error && data) setConfirmation({ code: (data as any).booking_code, id: (data as any).id });
     setSubmitting(false);
   };
@@ -110,7 +117,13 @@ const BookingPage = () => {
             <div className="flex justify-between"><span className="text-muted-foreground">{t("booking.service")}</span><span>{provider.service_type}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">{t("booking.date")}</span><span>{date ? format(date, "PPP") : ""}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">{t("booking.time")}</span><span>{selectedSlot}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">{t("booking.status")}</span><Badge className="bg-warning/10 text-warning border-warning/30">{t("booking.pending")}</Badge></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{t("booking.status")}</span>
+              {isEmergency ? (
+                <Badge className="bg-destructive/10 text-destructive border-destructive/30 gap-1"><Siren className="h-3 w-3" /> {t("emergency.pending")}</Badge>
+              ) : (
+                <Badge className="bg-warning/10 text-warning border-warning/30">{t("booking.pending")}</Badge>
+              )}
+            </div>
           </div>
           <div className="mt-6 flex gap-2">
             <Button className="flex-1" onClick={() => navigate("/customer-dashboard")}>{t("booking.myBookings")}</Button>
@@ -130,7 +143,10 @@ const BookingPage = () => {
         <ArrowLeft className="mr-1 h-4 w-4" /> {t("booking.back")}
       </Button>
 
-      <h1 className="text-2xl font-bold mb-6">{t("booking.title")}</h1>
+      <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+        {isEmergency && <Siren className="h-6 w-6 text-destructive" />}
+        {isEmergency ? t("emergency.bookTitle") : t("booking.title")}
+      </h1>
 
       <div className="rounded-xl border border-border bg-card p-5 shadow-soft mb-6">
         <div className="flex gap-4">

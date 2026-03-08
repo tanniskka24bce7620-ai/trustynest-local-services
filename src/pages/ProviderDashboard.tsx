@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/authContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { SERVICE_TYPES, SERVICE_ICONS } from "@/lib/mockData";
+import { SERVICE_TYPES, SERVICE_ICONS, EMERGENCY_SERVICE_TYPES } from "@/lib/mockData";
 import { Button } from "@/components/ui/button";
 import ProviderBookings from "@/components/ProviderBookings";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Star, Edit2, Save, Loader2, CalendarIcon, Camera, MapPin } from "lucide-react";
+import { CheckCircle, Star, Edit2, Save, Loader2, CalendarIcon, Camera, MapPin, Siren } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NotificationBell from "@/components/NotificationBell";
 
@@ -30,7 +30,7 @@ const ProviderDashboard = () => {
   const [uploading, setUploading] = useState(false);
 
   const [form, setForm] = useState({
-    name: "", age: "", experience: "", contact: "", serviceType: "", city: "", area: "", bio: "", available: true, latitude: "", longitude: "",
+    name: "", age: "", experience: "", contact: "", serviceType: "", city: "", area: "", bio: "", available: true, latitude: "", longitude: "", emergencyAvailable: false,
   });
 
   useEffect(() => {
@@ -47,6 +47,7 @@ const ProviderDashboard = () => {
         contact: p?.contact || "", serviceType: s?.service_type || "", city: p?.city || "", area: p?.area || "",
         bio: s?.bio || "", available: s?.available ?? true,
         latitude: s?.latitude?.toString() || "", longitude: s?.longitude?.toString() || "",
+        emergencyAvailable: s?.emergency_available ?? false,
       });
       if (p?.photo_url) setPhotoUrl(p.photo_url);
       if (s) { setServiceProfileId(s.id); setProfileSaved(true); setEditing(false); }
@@ -98,7 +99,7 @@ const ProviderDashboard = () => {
     await supabase.from("profiles").update({ name: form.name, contact: form.contact, city: form.city, area: form.area, profile_complete: true } as any).eq("user_id", user.id);
     const spData = {
       service_type: form.serviceType, age: parseInt(form.age) || null, experience: parseInt(form.experience) || 0,
-      bio: form.bio, available: form.available,
+      bio: form.bio, available: form.available, emergency_available: form.emergencyAvailable,
       latitude: form.latitude ? parseFloat(form.latitude) : null,
       longitude: form.longitude ? parseFloat(form.longitude) : null,
     };
@@ -191,6 +192,15 @@ const ProviderDashboard = () => {
                   <span className="text-sm font-medium">{t("providerDashboard.available")}</span>
                   <Switch checked={form.available} onCheckedChange={async (v) => { handleChange("available", v); if (serviceProfileId) await supabase.from("service_profiles").update({ available: v } as any).eq("id", serviceProfileId); }} />
                 </div>
+                {EMERGENCY_SERVICE_TYPES.includes(form.serviceType) && (
+                  <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+                    <div className="flex items-center gap-2">
+                      <Siren className="h-4 w-4 text-destructive" />
+                      <span className="text-sm font-medium">{t("emergency.enableToggle")}</span>
+                    </div>
+                    <Switch checked={form.emergencyAvailable} onCheckedChange={async (v) => { handleChange("emergencyAvailable", v); if (serviceProfileId) await supabase.from("service_profiles").update({ emergency_available: v } as any).eq("id", serviceProfileId); }} />
+                  </div>
+                )}
               </div>
             )}
 
@@ -265,6 +275,15 @@ const ProviderDashboard = () => {
                   <span className="text-sm font-medium">{t("providerDashboard.available")}</span>
                   <Switch checked={form.available} onCheckedChange={(v) => handleChange("available", v)} />
                 </div>
+                {EMERGENCY_SERVICE_TYPES.includes(form.serviceType) && (
+                  <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+                    <div className="flex items-center gap-2">
+                      <Siren className="h-4 w-4 text-destructive" />
+                      <span className="text-sm font-medium">{t("emergency.enableToggle")}</span>
+                    </div>
+                    <Switch checked={form.emergencyAvailable} onCheckedChange={(v) => handleChange("emergencyAvailable", v)} />
+                  </div>
+                )}
                 <Button type="submit" className="w-full" size="lg" disabled={saving}>
                   {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   {t("providerDashboard.saveProfile")}

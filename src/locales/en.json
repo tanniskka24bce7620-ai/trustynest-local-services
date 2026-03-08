@@ -293,5 +293,20 @@
     "micDenied": "Microphone permission denied. Please allow access.",
     "noSpeech": "Voice not recognized. Please try again.",
     "error": "Voice not recognized. Please try again."
+  },
+  "emergency": {
+    "toggleTitle": "Emergency Service Mode",
+    "toggleDesc": "Find providers available for immediate urgent service",
+    "enable": "Enable Emergency",
+    "disable": "Disable Emergency",
+    "badge": "Emergency Available",
+    "enableToggle": "Enable Emergency Service",
+    "sectionTitle": "Emergency Services Near You",
+    "priority": "Priority",
+    "bookNow": "Book Emergency",
+    "bookTitle": "Book Emergency Service",
+    "pending": "Emergency Pending",
+    "noProviders": "No emergency providers available nearby.",
+    "noProvidersDesc": "Try disabling emergency mode or check back later."
   }
 }
