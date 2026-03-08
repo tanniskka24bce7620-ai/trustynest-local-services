@@ -117,7 +117,13 @@ const BookingPage = () => {
             <div className="flex justify-between"><span className="text-muted-foreground">{t("booking.service")}</span><span>{provider.service_type}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">{t("booking.date")}</span><span>{date ? format(date, "PPP") : ""}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">{t("booking.time")}</span><span>{selectedSlot}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">{t("booking.status")}</span><Badge className="bg-warning/10 text-warning border-warning/30">{t("booking.pending")}</Badge></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{t("booking.status")}</span>
+              {isEmergency ? (
+                <Badge className="bg-destructive/10 text-destructive border-destructive/30 gap-1"><Siren className="h-3 w-3" /> {t("emergency.pending")}</Badge>
+              ) : (
+                <Badge className="bg-warning/10 text-warning border-warning/30">{t("booking.pending")}</Badge>
+              )}
+            </div>
           </div>
           <div className="mt-6 flex gap-2">
             <Button className="flex-1" onClick={() => navigate("/customer-dashboard")}>{t("booking.myBookings")}</Button>
