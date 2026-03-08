@@ -47,6 +47,7 @@ const ProviderDashboard = () => {
         contact: p?.contact || "", serviceType: s?.service_type || "", city: p?.city || "", area: p?.area || "",
         bio: s?.bio || "", available: s?.available ?? true,
         latitude: s?.latitude?.toString() || "", longitude: s?.longitude?.toString() || "",
+        emergencyAvailable: s?.emergency_available ?? false,
       });
       if (p?.photo_url) setPhotoUrl(p.photo_url);
       if (s) { setServiceProfileId(s.id); setProfileSaved(true); setEditing(false); }
