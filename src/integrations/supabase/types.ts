@@ -76,6 +76,59 @@ export type Database = {
           },
         ]
       }
+      chat_messages: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          image_url: string | null
+          is_read: boolean
+          message_type: string
+          original_language: string
+          original_text: string
+          receiver_id: string
+          sender_id: string
+          target_language: string
+          translated_text: string | null
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_read?: boolean
+          message_type?: string
+          original_language?: string
+          original_text: string
+          receiver_id: string
+          sender_id: string
+          target_language?: string
+          translated_text?: string | null
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_read?: boolean
+          message_type?: string
+          original_language?: string
+          original_text?: string
+          receiver_id?: string
+          sender_id?: string
+          target_language?: string
+          translated_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       complaints: {
         Row: {
           admin_notes: string | null
