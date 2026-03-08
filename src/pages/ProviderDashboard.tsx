@@ -96,10 +96,16 @@ const ProviderDashboard = () => {
     e.preventDefault();
     setSaving(true);
     await supabase.from("profiles").update({ name: form.name, contact: form.contact, city: form.city, area: form.area, profile_complete: true } as any).eq("user_id", user.id);
+    const spData = {
+      service_type: form.serviceType, age: parseInt(form.age) || null, experience: parseInt(form.experience) || 0,
+      bio: form.bio, available: form.available,
+      latitude: form.latitude ? parseFloat(form.latitude) : null,
+      longitude: form.longitude ? parseFloat(form.longitude) : null,
+    };
     if (serviceProfileId) {
-      await supabase.from("service_profiles").update({ service_type: form.serviceType, age: parseInt(form.age) || null, experience: parseInt(form.experience) || 0, bio: form.bio, available: form.available } as any).eq("id", serviceProfileId);
+      await supabase.from("service_profiles").update(spData as any).eq("id", serviceProfileId);
     } else {
-      const { data } = await supabase.from("service_profiles").insert({ user_id: user.id, service_type: form.serviceType, age: parseInt(form.age) || null, experience: parseInt(form.experience) || 0, bio: form.bio, available: form.available } as any).select().maybeSingle();
+      const { data } = await supabase.from("service_profiles").insert({ user_id: user.id, ...spData } as any).select().maybeSingle();
       if (data) setServiceProfileId((data as any).id);
     }
     await refreshUser();
