@@ -163,7 +163,9 @@
     "saveProfile": "Save Profile",
     "yearsExp": "Years Exp",
     "rating": "Rating",
-    "reviews": "Reviews"
+    "reviews": "Reviews",
+    "uploadPhoto": "Upload",
+    "photoHint": "Click to upload a profile photo (JPG, PNG, max 5MB)"
   },
   "booking": {
     "title": "Book a Service",

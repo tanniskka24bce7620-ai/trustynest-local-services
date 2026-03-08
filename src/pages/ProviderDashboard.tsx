@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/authContext";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Star, Edit2, Save, Loader2, CalendarIcon } from "lucide-react";
+import { CheckCircle, Star, Edit2, Save, Loader2, CalendarIcon, Camera } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NotificationBell from "@/components/NotificationBell";
 
@@ -20,11 +20,14 @@ const ProviderDashboard = () => {
   const { t } = useTranslation();
   const { user, loading: authLoading, refreshUser } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [profileSaved, setProfileSaved] = useState(false);
   const [editing, setEditing] = useState(true);
   const [saving, setSaving] = useState(false);
   const [serviceProfileId, setServiceProfileId] = useState<string | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
 
   const [form, setForm] = useState({
     name: "", age: "", experience: "", contact: "", serviceType: "", city: "", area: "", bio: "", available: true,
@@ -44,6 +47,7 @@ const ProviderDashboard = () => {
         contact: p?.contact || "", serviceType: s?.service_type || "", city: p?.city || "", area: p?.area || "",
         bio: s?.bio || "", available: s?.available ?? true,
       });
+      if (p?.photo_url) setPhotoUrl(p.photo_url);
       if (s) { setServiceProfileId(s.id); setProfileSaved(true); setEditing(false); }
     };
     load();
@@ -52,6 +56,40 @@ const ProviderDashboard = () => {
   if (authLoading || !user) return null;
 
   const handleChange = (field: string, value: string | boolean) => setForm((prev) => ({ ...prev, [field]: value }));
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file
+    if (!file.type.startsWith("image/")) return;
+    if (file.size > 5 * 1024 * 1024) return; // 5MB max
+
+    setUploading(true);
+    const fileExt = file.name.split(".").pop();
+    const filePath = `${user.id}/avatar.${fileExt}`;
+
+    // Upload to storage
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, { upsert: true });
+
+    if (!uploadError) {
+      const { data: { publicUrl } } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      // Add cache-bust to force refresh
+      const url = `${publicUrl}?t=${Date.now()}`;
+      setPhotoUrl(url);
+
+      // Update profile
+      await supabase.from("profiles").update({ photo_url: url } as any).eq("user_id", user.id);
+    }
+    setUploading(false);
+  };
+
+  const avatarSrc = photoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(form.name || "P")}&background=3b82f6&color=fff`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +151,23 @@ const ProviderDashboard = () => {
             {profileSaved && !editing && (
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-muted text-3xl">{SERVICE_ICONS[form.serviceType] || "👷"}</div>
+                  <div className="relative group">
+                    <img
+                      src={avatarSrc}
+                      alt={form.name}
+                      className="h-16 w-16 rounded-xl object-cover"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
+                    >
+                      {uploading ? (
+                        <Loader2 className="h-5 w-5 animate-spin text-white" />
+                      ) : (
+                        <Camera className="h-5 w-5 text-white" />
+                      )}
+                    </button>
+                  </div>
                   <div>
                     <h2 className="text-xl font-semibold">{form.name}</h2>
                     <p className="text-sm text-muted-foreground">{form.serviceType}</p>
@@ -135,6 +189,36 @@ const ProviderDashboard = () => {
 
             {editing && (
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Photo upload */}
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                    <img
+                      src={avatarSrc}
+                      alt={form.name}
+                      className="h-24 w-24 rounded-2xl object-cover border-2 border-border"
+                    />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                      {uploading ? (
+                        <Loader2 className="h-6 w-6 animate-spin text-white" />
+                      ) : (
+                        <>
+                          <Camera className="h-6 w-6 text-white" />
+                          <span className="mt-1 text-[10px] text-white font-medium">{t("providerDashboard.uploadPhoto")}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t("providerDashboard.photoHint")}</p>
+                </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handlePhotoUpload}
+                />
+
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div><Label>{t("providerDashboard.fullName")}</Label><Input value={form.name} onChange={(e) => handleChange("name", e.target.value)} required /></div>
                   <div><Label>{t("providerDashboard.age")}</Label><Input type="number" value={form.age} onChange={(e) => handleChange("age", e.target.value)} required /></div>
@@ -166,6 +250,15 @@ const ProviderDashboard = () => {
 
         <TabsContent value="bookings"><ProviderBookings /></TabsContent>
       </Tabs>
+
+      {/* Hidden file input shared between edit and view modes */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handlePhotoUpload}
+      />
     </div>
   );
 };
