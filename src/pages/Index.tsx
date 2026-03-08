@@ -85,6 +85,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Leaderboard */}
+      <LeaderboardSection />
+
       {/* Trust Section */}
       <section className="container mx-auto px-4 py-16">
         <div className="rounded-2xl gradient-hero p-8 text-center md:p-12">

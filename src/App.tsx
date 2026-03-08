@@ -43,6 +43,7 @@ const App = () => (
             <Route path="/book" element={<BookingPage />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/hall-of-fame" element={<HallOfFame />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
