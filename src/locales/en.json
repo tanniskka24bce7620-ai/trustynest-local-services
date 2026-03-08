@@ -138,7 +138,10 @@
     "mostExperience": "Most Experience",
     "providersFound": "{{count}} service providers found",
     "noProviders": "No service providers found.",
-    "noProvidersDesc": "Try adjusting your filters or check back later."
+    "noProvidersDesc": "Try adjusting your filters or check back later.",
+    "nearYou": "Service Providers Near You",
+    "within5km": "Within 5 km",
+    "nearestFirst": "Nearest First"
   },
   "providerDashboard": {
     "title": "Service Provider Dashboard",
