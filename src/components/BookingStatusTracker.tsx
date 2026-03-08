@@ -39,7 +39,7 @@ const BookingStatusTracker = () => {
   const [newSlot, setNewSlot] = useState<string | null>(null);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
-
+  const [complaintBooking, setComplaintBooking] = useState<Booking | null>(null);
   const DEFAULT_SLOTS = [
     "08:00–09:00","09:00–10:00","10:00–11:00","11:00–12:00",
     "12:00–13:00","13:00–14:00","14:00–15:00","15:00–16:00",
