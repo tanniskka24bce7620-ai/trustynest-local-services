@@ -218,6 +218,19 @@ const BookingStatusTracker = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {complaintBooking && (
+        <ComplaintForm
+          open={!!complaintBooking}
+          onOpenChange={(open) => { if (!open) setComplaintBooking(null); }}
+          bookingId={complaintBooking.id}
+          bookingCode={complaintBooking.booking_code}
+          providerName={complaintBooking.provider_name}
+          providerUserId={complaintBooking.provider_user_id}
+          serviceProfileId={complaintBooking.service_profile_id}
+          serviceType={complaintBooking.service_type}
+        />
+      )}
     </div>
   );
 };
