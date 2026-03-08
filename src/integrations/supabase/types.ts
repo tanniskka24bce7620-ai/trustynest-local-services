@@ -334,6 +334,41 @@ export type Database = {
           },
         ]
       }
+      provider_locations: {
+        Row: {
+          booking_id: string
+          id: string
+          latitude: number
+          longitude: number
+          provider_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          id?: string
+          latitude: number
+          longitude: number
+          provider_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          provider_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_locations_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           comment: string | null
