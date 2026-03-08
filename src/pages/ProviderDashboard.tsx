@@ -30,7 +30,7 @@ const ProviderDashboard = () => {
   const [uploading, setUploading] = useState(false);
 
   const [form, setForm] = useState({
-    name: "", age: "", experience: "", contact: "", serviceType: "", city: "", area: "", bio: "", available: true, latitude: "", longitude: "",
+    name: "", age: "", experience: "", contact: "", serviceType: "", city: "", area: "", bio: "", available: true, latitude: "", longitude: "", emergencyAvailable: false,
   });
 
   useEffect(() => {
