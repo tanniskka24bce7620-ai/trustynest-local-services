@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import VoiceRecorder from "@/components/chat/VoiceRecorder";
 import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
+import TypingIndicator from "@/components/chat/TypingIndicator";
+import { useChatNotifications } from "@/hooks/useChatNotifications";
 
 interface ChatMessage {
   id: string;
@@ -42,6 +44,7 @@ const ChatPage = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { notify } = useChatNotifications();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
@@ -49,8 +52,11 @@ const ChatPage = () => {
   const [partner, setPartner] = useState<ChatPartner | null>(null);
   const [myLanguage, setMyLanguage] = useState("en");
   const [showOriginal, setShowOriginal] = useState<Set<string>>(new Set());
+  const [partnerTyping, setPartnerTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingChannelRef = useRef<any>(null);
 
   // Load booking info and partner details
   useEffect(() => {
@@ -91,7 +97,7 @@ const ChatPage = () => {
     load();
   }, [bookingId, user, authLoading]);
 
-  // Realtime subscription
+  // Realtime subscription for messages
   useEffect(() => {
     if (!bookingId) return;
     const channel = supabase
@@ -102,17 +108,47 @@ const ChatPage = () => {
           setMessages((prev) => prev.some((m) => m.id === newMsg.id) ? prev : [...prev, newMsg]);
           if (user && newMsg.receiver_id === user.id) {
             supabase.from("chat_messages").update({ is_read: true } as any).eq("id", newMsg.id).then();
+            // Browser push notification
+            notify(partner?.name || "New message", newMsg.translated_text || newMsg.original_text);
           }
         }
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
+  }, [bookingId, user, partner, notify]);
+
+  // Typing indicator channel (broadcast, no DB)
+  useEffect(() => {
+    if (!bookingId || !user) return;
+    const channel = supabase.channel(`typing-${bookingId}`)
+      .on("broadcast", { event: "typing" }, (payload: any) => {
+        if (payload.payload?.user_id !== user.id) {
+          setPartnerTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setPartnerTyping(false), 3000);
+        }
+      })
+      .subscribe();
+    typingChannelRef.current = channel;
+    return () => {
+      supabase.removeChannel(channel);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    };
   }, [bookingId, user]);
+
+  const broadcastTyping = useCallback(() => {
+    if (!typingChannelRef.current || !user) return;
+    typingChannelRef.current.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { user_id: user.id },
+    });
+  }, [user]);
 
   // Auto scroll
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+  }, [messages, partnerTyping]);
 
   const sendMessage = useCallback(async (text: string, imageUrl?: string, messageType: string = "text") => {
     if (!user || !bookingId || !partner) return;
@@ -182,6 +218,11 @@ const ChatPage = () => {
     sendMessage(text, undefined, "voice");
   }, [sendMessage]);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+    broadcastTyping();
+  };
+
   if (authLoading || loading) {
     return (
       <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
@@ -203,7 +244,11 @@ const ChatPage = () => {
             <div>
               <p className="font-semibold text-sm">{partner.name}</p>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Globe className="h-3 w-3" /> {LANG_NAMES[partner.language] || partner.language}
+                {partnerTyping ? (
+                  <span className="text-primary animate-pulse">typing…</span>
+                ) : (
+                  <><Globe className="h-3 w-3" /> {LANG_NAMES[partner.language] || partner.language}</>
+                )}
               </p>
             </div>
           </div>
@@ -230,6 +275,8 @@ const ChatPage = () => {
             onToggleOriginal={toggleOriginal}
           />
         ))}
+
+        {partnerTyping && <TypingIndicator name={partner?.name || "User"} />}
       </div>
 
       {/* Input */}
@@ -243,7 +290,7 @@ const ChatPage = () => {
             <ImageIcon className="h-5 w-5 text-muted-foreground" />
           </Button>
           <VoiceRecorder language={myLanguage} onTranscript={handleVoiceTranscript} disabled={sending} />
-          <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type a message..." className="flex-1" disabled={sending} />
+          <Input value={input} onChange={handleInputChange} placeholder="Type a message..." className="flex-1" disabled={sending} />
           <Button type="submit" size="sm" disabled={sending || !input.trim()} className="shrink-0 gradient-hero border-0 text-primary-foreground">
             {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
