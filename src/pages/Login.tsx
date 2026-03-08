@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Wrench, Users, Loader2 } from "lucide-react";
+import servnestLogo from "@/assets/servnest-logo.png";
 
 const Login = () => {
   const { t } = useTranslation();
