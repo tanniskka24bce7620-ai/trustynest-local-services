@@ -11,6 +11,7 @@ import VoiceRecorder from "@/components/chat/VoiceRecorder";
 import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
 import TypingIndicator from "@/components/chat/TypingIndicator";
 import { useChatNotifications } from "@/hooks/useChatNotifications";
+import { usePresence } from "@/hooks/usePresence";
 
 interface ChatMessage {
   id: string;
