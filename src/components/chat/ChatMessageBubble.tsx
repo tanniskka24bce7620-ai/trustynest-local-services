@@ -1,7 +1,14 @@
 import { useState, useCallback } from "react";
-import { Globe, Volume2, Loader2 } from "lucide-react";
+import { Globe, Volume2, Loader2, Languages } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 import MessageReactions from "./MessageReactions";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ChatMessage {
   id: string;
@@ -39,6 +46,8 @@ const SPEECH_LANG_CODES: Record<string, string> = {
 
 const ChatMessageBubble = ({ msg, isMine, myLanguage, showOriginal, onToggleOriginal, currentUserId }: ChatMessageBubbleProps) => {
   const [speaking, setSpeaking] = useState(false);
+  const [onDemandTranslation, setOnDemandTranslation] = useState<{ text: string; lang: string } | null>(null);
+  const [translating, setTranslating] = useState(false);
 
   const showTranslated = !isMine && msg.translated_text && msg.original_language !== myLanguage;
   const displayText = showOriginal
@@ -68,6 +77,36 @@ const ChatMessageBubble = ({ msg, isMine, myLanguage, showOriginal, onToggleOrig
     const lang = showTranslated && !showOriginal ? msg.target_language : msg.original_language;
     speakText(textToSpeak, lang);
   };
+
+  const handleTranslateTo = async (targetLang: string) => {
+    if (translating) return;
+    // If already translated to this lang, toggle off
+    if (onDemandTranslation?.lang === targetLang) {
+      setOnDemandTranslation(null);
+      return;
+    }
+    setTranslating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("translate-message", {
+        body: {
+          text: msg.original_text,
+          source_language: msg.original_language,
+          target_language: targetLang,
+        },
+      });
+      if (!error && data?.translated_text) {
+        setOnDemandTranslation({ text: data.translated_text, lang: targetLang });
+      }
+    } catch (e) {
+      console.error("On-demand translation failed:", e);
+    } finally {
+      setTranslating(false);
+    }
+  };
+
+  const availableLangs = Object.entries(LANG_NAMES).filter(
+    ([code]) => code !== msg.original_language
+  );
 
   return (
     <div className={cn("flex", isMine ? "justify-end" : "justify-start")}>
@@ -103,6 +142,17 @@ const ChatMessageBubble = ({ msg, isMine, myLanguage, showOriginal, onToggleOrig
             <p className="text-sm whitespace-pre-wrap">{displayText}</p>
           )}
 
+          {/* On-demand translation result */}
+          {onDemandTranslation && (
+            <div className={cn(
+              "mt-1.5 pt-1.5 border-t text-xs",
+              isMine ? "border-primary-foreground/20 text-primary-foreground/80" : "border-border text-muted-foreground"
+            )}>
+              <span className="font-medium">Translation ({LANG_NAMES[onDemandTranslation.lang]}):</span>
+              <p className="mt-0.5 whitespace-pre-wrap">{onDemandTranslation.text}</p>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <span className={cn("text-[10px]", isMine ? "text-primary-foreground/60" : "text-muted-foreground")}>
               {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -134,6 +184,43 @@ const ChatMessageBubble = ({ msg, isMine, myLanguage, showOriginal, onToggleOrig
               >
                 <Volume2 className="h-2.5 w-2.5" />
               </button>
+            )}
+
+            {/* On-demand translate button */}
+            {msg.original_text !== "📷 Image" && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={cn(
+                      "text-[10px] flex items-center gap-0.5 hover:underline",
+                      isMine ? "text-primary-foreground/60" : "text-muted-foreground"
+                    )}
+                    disabled={translating}
+                  >
+                    {translating ? (
+                      <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                    ) : (
+                      <Languages className="h-2.5 w-2.5" />
+                    )}
+                    Translate
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="max-h-48 overflow-y-auto">
+                  {availableLangs.map(([code, name]) => (
+                    <DropdownMenuItem
+                      key={code}
+                      onClick={() => handleTranslateTo(code)}
+                      className={cn(
+                        "text-xs cursor-pointer",
+                        onDemandTranslation?.lang === code && "font-semibold text-primary"
+                      )}
+                    >
+                      {name}
+                      {onDemandTranslation?.lang === code && " ✓"}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
 
             {isMine && (
