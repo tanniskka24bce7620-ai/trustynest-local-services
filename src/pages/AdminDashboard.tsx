@@ -224,7 +224,13 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Flagged provider alerts */}
+      <Tabs defaultValue="complaints" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="complaints"><ShieldAlert className="h-4 w-4 mr-1" /> Complaints</TabsTrigger>
+          <TabsTrigger value="trust"><Shield className="h-4 w-4 mr-1" /> {t("trustScore.trustMonitoring")}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="complaints">
       {flaggedProviders.length > 0 && (
         <div className="mb-4 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
           <div className="flex items-center gap-2 mb-2">
