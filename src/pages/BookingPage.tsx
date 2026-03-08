@@ -100,6 +100,8 @@ const BookingPage = () => {
     const bookingData: any = {
       customer_id: user.id, service_profile_id: spId, provider_user_id: provider.user_id,
       booking_date: format(date, "yyyy-MM-dd"), time_slot: selectedSlot, service_note: note,
+      customer_latitude: customerLocation?.lat || null,
+      customer_longitude: customerLocation?.lng || null,
     };
     if (isEmergency) {
       bookingData.is_emergency = true;
