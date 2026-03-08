@@ -105,6 +105,7 @@ const CustomerDashboard = () => {
           bio: sp.bio || "", photo: profile?.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.name || "U")}&background=3b82f6&color=fff`,
           available: sp.available, verified: profile?.aadhaar_verified || false, rating: parseFloat(sp.rating) || 0, reviewCount: sp.review_count || 0,
           latitude: sp.latitude, longitude: sp.longitude,
+          emergencyAvailable: sp.emergency_available || false,
           reviews: reviews.map((r: any) => ({ id: r.id, customerName: "Customer", rating: r.rating, comment: r.comment || "", date: r.created_at?.slice(0, 10) || "" })),
         };
       });
