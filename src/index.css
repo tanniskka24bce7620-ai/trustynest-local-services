@@ -36,11 +36,14 @@
 
     --radius: 0.75rem;
 
-    --success: 142 71% 45%;
+    --success: 120 60% 42%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
+    --warning: 45 100% 51%;
     --warning-foreground: 0 0% 100%;
+
+    --brand-orange: 27 95% 53%;
+    --brand-red: 0 72% 51%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
