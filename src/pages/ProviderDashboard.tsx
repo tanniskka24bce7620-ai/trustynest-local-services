@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Star, Edit2, Save, Loader2, CalendarIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NotificationBell from "@/components/NotificationBell";
 
 const ProviderDashboard = () => {
   const { t } = useTranslation();
