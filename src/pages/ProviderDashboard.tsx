@@ -150,6 +150,7 @@ const ProviderDashboard = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="profile"><Edit2 className="h-4 w-4 mr-1" /> {t("providerDashboard.profile")}</TabsTrigger>
           <TabsTrigger value="bookings"><CalendarIcon className="h-4 w-4 mr-1" /> {t("providerDashboard.bookings")}</TabsTrigger>
+          <TabsTrigger value="trust"><Shield className="h-4 w-4 mr-1" /> {t("trustScore.title")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
