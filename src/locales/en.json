@@ -260,5 +260,13 @@
     "category": "Category",
     "rating": "Rating",
     "age": "Age"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "markAllRead": "Mark all read",
+    "markRead": "Mark as read",
+    "clearAll": "Clear all notifications",
+    "delete": "Delete"
   }
 }
