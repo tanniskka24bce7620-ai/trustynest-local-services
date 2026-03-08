@@ -41,6 +41,7 @@ const ProviderBookings = () => {
     const mapped: Booking[] = (data as any[]).map((b: any) => ({
       id: b.id, booking_code: b.booking_code, booking_date: b.booking_date, time_slot: b.time_slot,
       status: b.status, service_note: b.service_note, customer_name: profileMap.get(b.customer_id)?.name || "Customer",
+      is_emergency: b.is_emergency || false,
     }));
     setBookings(mapped);
     setLoading(false);
