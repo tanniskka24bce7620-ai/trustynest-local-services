@@ -212,9 +212,11 @@ const CustomerDashboard = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="browse"><Search className="h-4 w-4 mr-1" /> {t("customerDashboard.browse")}</TabsTrigger>
           <TabsTrigger value="bookings"><CalendarIcon className="h-4 w-4 mr-1" /> {t("customerDashboard.bookings")}</TabsTrigger>
+          <TabsTrigger value="complaints"><ShieldAlert className="h-4 w-4 mr-1" /> {t("complaint.tabTitle")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="bookings"><BookingStatusTracker /></TabsContent>
+        <TabsContent value="complaints"><ComplaintTracker /></TabsContent>
 
         <TabsContent value="browse">
           {/* Emergency Mode Toggle */}
