@@ -20,7 +20,10 @@ export type Database = {
           booking_date: string
           cancellation_reason: string | null
           created_at: string
+          customer_address: string | null
           customer_id: string
+          customer_latitude: number | null
+          customer_longitude: number | null
           emergency_requested_at: string | null
           emergency_status: string | null
           id: string
@@ -37,7 +40,10 @@ export type Database = {
           booking_date: string
           cancellation_reason?: string | null
           created_at?: string
+          customer_address?: string | null
           customer_id: string
+          customer_latitude?: number | null
+          customer_longitude?: number | null
           emergency_requested_at?: string | null
           emergency_status?: string | null
           id?: string
@@ -54,7 +60,10 @@ export type Database = {
           booking_date?: string
           cancellation_reason?: string | null
           created_at?: string
+          customer_address?: string | null
           customer_id?: string
+          customer_latitude?: number | null
+          customer_longitude?: number | null
           emergency_requested_at?: string | null
           emergency_status?: string | null
           id?: string

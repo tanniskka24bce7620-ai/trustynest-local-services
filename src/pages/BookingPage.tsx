@@ -47,6 +47,22 @@ const BookingPage = () => {
   const [dayAvailable, setDayAvailable] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState<{ code: string; id: string } | null>(null);
+  const [customerLocation, setCustomerLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+
+  // Request customer location on mount
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCustomerLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationLoading(false);
+      },
+      () => setLocationLoading(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
 
   useEffect(() => {
     if (!spId) return;
@@ -84,6 +100,8 @@ const BookingPage = () => {
     const bookingData: any = {
       customer_id: user.id, service_profile_id: spId, provider_user_id: provider.user_id,
       booking_date: format(date, "yyyy-MM-dd"), time_slot: selectedSlot, service_note: note,
+      customer_latitude: customerLocation?.lat || null,
+      customer_longitude: customerLocation?.lng || null,
     };
     if (isEmergency) {
       bookingData.is_emergency = true;
