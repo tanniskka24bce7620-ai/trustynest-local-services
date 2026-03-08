@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
+import ComplaintTracker from "@/components/ComplaintTracker";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/authContext";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal, CheckCircle, Loader2, CalendarIcon, MapPin, List as ListIcon, Map as MapIcon, Navigation, LocateFixed, Mic, MicOff, Siren } from "lucide-react";
+import { Search, SlidersHorizontal, CheckCircle, Loader2, CalendarIcon, MapPin, List as ListIcon, Map as MapIcon, Navigation, LocateFixed, Mic, MicOff, Siren, ShieldAlert } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGeolocation, getDistanceKm } from "@/hooks/useGeolocation";
 import { Badge } from "@/components/ui/badge";
@@ -211,9 +212,11 @@ const CustomerDashboard = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="browse"><Search className="h-4 w-4 mr-1" /> {t("customerDashboard.browse")}</TabsTrigger>
           <TabsTrigger value="bookings"><CalendarIcon className="h-4 w-4 mr-1" /> {t("customerDashboard.bookings")}</TabsTrigger>
+          <TabsTrigger value="complaints"><ShieldAlert className="h-4 w-4 mr-1" /> {t("complaint.tabTitle")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="bookings"><BookingStatusTracker /></TabsContent>
+        <TabsContent value="complaints"><ComplaintTracker /></TabsContent>
 
         <TabsContent value="browse">
           {/* Emergency Mode Toggle */}

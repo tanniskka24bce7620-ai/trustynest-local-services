@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { CalendarIcon, Clock, Loader2, X, RefreshCw } from "lucide-react";
+import { CalendarIcon, Clock, Loader2, X, RefreshCw, ShieldAlert } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, isBefore, startOfDay, addDays } from "date-fns";
 import { cn } from "@/lib/utils";
+import ComplaintForm from "@/components/ComplaintForm";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-warning/10 text-warning border-warning/30",
@@ -38,7 +39,7 @@ const BookingStatusTracker = () => {
   const [newSlot, setNewSlot] = useState<string | null>(null);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
-
+  const [complaintBooking, setComplaintBooking] = useState<Booking | null>(null);
   const DEFAULT_SLOTS = [
     "08:00–09:00","09:00–10:00","10:00–11:00","11:00–12:00",
     "12:00–13:00","13:00–14:00","14:00–15:00","15:00–16:00",
@@ -131,6 +132,11 @@ const BookingStatusTracker = () => {
                 </Button>
               </div>
             )}
+            {b.status === "completed" && (
+              <Button size="sm" variant="outline" className="shrink-0 gap-1 text-destructive hover:text-destructive border-destructive/30" onClick={() => setComplaintBooking(b)}>
+                <ShieldAlert className="h-3 w-3" /> {t("complaint.reportIssue")}
+              </Button>
+            )}
           </div>
           <div className="mt-3 flex items-center gap-1">
             {["pending", "confirmed", "completed"].map((step, i) => {
@@ -212,6 +218,19 @@ const BookingStatusTracker = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {complaintBooking && (
+        <ComplaintForm
+          open={!!complaintBooking}
+          onOpenChange={(open) => { if (!open) setComplaintBooking(null); }}
+          bookingId={complaintBooking.id}
+          bookingCode={complaintBooking.booking_code}
+          providerName={complaintBooking.provider_name}
+          providerUserId={complaintBooking.provider_user_id}
+          serviceProfileId={complaintBooking.service_profile_id}
+          serviceType={complaintBooking.service_type}
+        />
+      )}
     </div>
   );
 };
