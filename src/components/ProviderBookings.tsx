@@ -126,6 +126,11 @@ const ProviderBookings = () => {
                   </Button>
                 </>
               )}
+              {b.status === "confirmed" && (
+                <Button size="sm" variant="outline" className="gap-1" onClick={() => navigate(`/chat/${b.id}`)}>
+                  <MessageCircle className="h-3 w-3" /> Chat
+                </Button>
+              )}
               <TripControls booking={b} onStatusChange={loadBookings} />
             </div>
           </div>

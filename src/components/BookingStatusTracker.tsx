@@ -127,9 +127,14 @@ const BookingStatusTracker = () => {
             {(b.status === "pending" || b.status === "confirmed") && (
               <div className="flex gap-1 shrink-0 flex-wrap justify-end">
                 {b.status === "confirmed" && (
-                  <Button size="sm" className="gap-1 gradient-hero border-0 text-primary-foreground" onClick={() => navigate(`/track/${b.id}`)}>
-                    <MapPin className="h-3 w-3" /> Track
-                  </Button>
+                  <>
+                    <Button size="sm" className="gap-1 gradient-hero border-0 text-primary-foreground" onClick={() => navigate(`/track/${b.id}`)}>
+                      <MapPin className="h-3 w-3" /> Track
+                    </Button>
+                    <Button size="sm" variant="outline" className="gap-1" onClick={() => navigate(`/chat/${b.id}`)}>
+                      <MessageCircle className="h-3 w-3" /> Chat
+                    </Button>
+                  </>
                 )}
                 <Button size="sm" variant="outline" onClick={() => { setRescheduleDialog(b); setNewDate(undefined); setNewSlot(null); }}>
                   <RefreshCw className="h-3 w-3 mr-1" /> {t("bookingTracker.reschedule")}
