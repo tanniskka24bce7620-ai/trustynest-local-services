@@ -197,7 +197,7 @@ const CustomerDashboard = () => {
                   <ListIcon className="h-4 w-4" />
                 </Button>
                 <Button variant={viewMode === "map" ? "default" : "ghost"} size="sm" className="h-7 px-2" onClick={() => setViewMode("map")}>
-                  <Map className="h-4 w-4" />
+                  <MapIcon className="h-4 w-4" />
                 </Button>
               </div>
             </div>
