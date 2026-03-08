@@ -35,6 +35,7 @@ const BookingPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const spId = searchParams.get("sp");
+  const isEmergency = searchParams.get("emergency") === "true";
 
   const [provider, setProvider] = useState<any>(null);
   const [loading, setLoading] = useState(true);
