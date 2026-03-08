@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal, CheckCircle, Loader2, CalendarIcon, MapPin, List as ListIcon, Map as MapIcon, Navigation, LocateFixed, Mic, MicOff, Siren } from "lucide-react";
+import { Search, SlidersHorizontal, CheckCircle, Loader2, CalendarIcon, MapPin, List as ListIcon, Map as MapIcon, Navigation, LocateFixed, Mic, MicOff, Siren, ShieldAlert } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGeolocation, getDistanceKm } from "@/hooks/useGeolocation";
 import { Badge } from "@/components/ui/badge";
