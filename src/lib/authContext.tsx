@@ -73,22 +73,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // First restore session from storage
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        const authUser = await buildAuthUser(session.user);
-        setUser(authUser);
+        // Fire and forget — don't block
+        buildAuthUser(session.user).then((authUser) => {
+          setUser(authUser);
+          setLoading(false);
+        });
+      } else {
+        setLoading(false);
+      }
+    });
+
+    // Handle subsequent auth changes (sign in/out) — never await inside this callback
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        // Fire and forget to avoid deadlocks
+        buildAuthUser(session.user).then((authUser) => {
+          setUser(authUser);
+        });
       } else {
         setUser(null);
       }
-      setLoading(false);
-    });
-
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const authUser = await buildAuthUser(session.user);
-        setUser(authUser);
-      }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
