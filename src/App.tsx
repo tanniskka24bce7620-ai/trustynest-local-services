@@ -21,6 +21,7 @@ import NotFound from "./pages/NotFound";
 import HallOfFame from "./pages/HallOfFame";
 import AdminDashboard from "./pages/AdminDashboard";
 import TrackingPage from "./pages/TrackingPage";
+import ChatPage from "./pages/ChatPage";
 
 const queryClient = new QueryClient();
 
