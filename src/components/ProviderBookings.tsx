@@ -4,10 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Clock, Loader2, Check, X, Siren, Navigation, MessageCircle } from "lucide-react";
+import { CalendarIcon, Clock, Loader2, Check, X, Siren, Navigation, MessageCircle, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProviderTracking } from "@/hooks/useProviderTracking";
 import { useNavigate } from "react-router-dom";
+import ProviderRouteMap from "@/components/ProviderRouteMap";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-warning/10 text-warning border-warning/30",
@@ -20,6 +21,9 @@ interface Booking {
   id: string; booking_code: string; booking_date: string; time_slot: string;
   status: string; service_note: string; customer_name: string;
   is_emergency: boolean;
+  customer_latitude: number | null;
+  customer_longitude: number | null;
+  customer_contact: string | null;
 }
 
 const TripControls = ({ booking, onStatusChange }: { booking: Booking; onStatusChange: () => void }) => {
@@ -64,6 +68,7 @@ const ProviderBookings = () => {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedMap, setExpandedMap] = useState<string | null>(null);
 
   useEffect(() => { if (user) loadBookings(); }, [user]);
 
@@ -74,13 +79,16 @@ const ProviderBookings = () => {
     if (!data || (data as any[]).length === 0) { setBookings([]); setLoading(false); return; }
 
     const customerIds = [...new Set((data as any[]).map((b: any) => b.customer_id))];
-    const { data: profiles } = await supabase.from("profiles").select("user_id, name").in("user_id", customerIds);
+    const { data: profiles } = await supabase.from("profiles").select("user_id, name, contact").in("user_id", customerIds);
     const profileMap = new Map((profiles as any[] || []).map((p: any) => [p.user_id, p]));
 
     const mapped: Booking[] = (data as any[]).map((b: any) => ({
       id: b.id, booking_code: b.booking_code, booking_date: b.booking_date, time_slot: b.time_slot,
       status: b.status, service_note: b.service_note, customer_name: profileMap.get(b.customer_id)?.name || "Customer",
       is_emergency: b.is_emergency || false,
+      customer_latitude: b.customer_latitude || null,
+      customer_longitude: b.customer_longitude || null,
+      customer_contact: profileMap.get(b.customer_id)?.contact || null,
     }));
     setBookings(mapped);
     setLoading(false);
@@ -128,13 +136,38 @@ const ProviderBookings = () => {
                 </>
               )}
               {b.status === "confirmed" && (
-                <Button size="sm" variant="outline" className="gap-1" onClick={() => navigate(`/chat/${b.id}`)}>
-                  <MessageCircle className="h-3 w-3" /> Chat
-                </Button>
+                <>
+                  <Button size="sm" variant="outline" className="gap-1" onClick={() => navigate(`/chat/${b.id}`)}>
+                    <MessageCircle className="h-3 w-3" /> Chat
+                  </Button>
+                  {b.customer_latitude && b.customer_longitude && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1"
+                      onClick={() => setExpandedMap(expandedMap === b.id ? null : b.id)}
+                    >
+                      <MapPin className="h-3 w-3" /> {expandedMap === b.id ? "Hide Map" : "View Route"}
+                    </Button>
+                  )}
+                </>
               )}
               <TripControls booking={b} onStatusChange={loadBookings} />
             </div>
           </div>
+
+          {/* Route map for confirmed bookings */}
+          {expandedMap === b.id && b.status === "confirmed" && b.customer_latitude && b.customer_longitude && (
+            <div className="mt-4">
+              <ProviderRouteMap
+                bookingId={b.id}
+                customerLat={b.customer_latitude}
+                customerLng={b.customer_longitude}
+                customerName={b.customer_name}
+                customerContact={b.customer_contact || undefined}
+              />
+            </div>
+          )}
         </div>
       ))}
     </div>
