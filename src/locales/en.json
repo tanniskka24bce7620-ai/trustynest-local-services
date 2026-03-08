@@ -138,7 +138,10 @@
     "mostExperience": "Most Experience",
     "providersFound": "{{count}} service providers found",
     "noProviders": "No service providers found.",
-    "noProvidersDesc": "Try adjusting your filters or check back later."
+    "noProvidersDesc": "Try adjusting your filters or check back later.",
+    "nearYou": "Service Providers Near You",
+    "within5km": "Within 5 km",
+    "nearestFirst": "Nearest First"
   },
   "providerDashboard": {
     "title": "Service Provider Dashboard",
@@ -165,7 +168,12 @@
     "rating": "Rating",
     "reviews": "Reviews",
     "uploadPhoto": "Upload",
-    "photoHint": "Click to upload a profile photo (JPG, PNG, max 5MB)"
+    "photoHint": "Click to upload a profile photo (JPG, PNG, max 5MB)",
+    "location": "Location Coordinates",
+    "detectLocation": "Detect My Location",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "locationHint": "Click 'Detect My Location' or enter coordinates manually for distance-based matching"
   },
   "booking": {
     "title": "Book a Service",
@@ -270,5 +278,11 @@
     "markRead": "Mark as read",
     "clearAll": "Clear all notifications",
     "delete": "Delete"
+  },
+  "location": {
+    "detecting": "Detecting location...",
+    "detected": "Location detected",
+    "enable": "Enable Location",
+    "manualSelect": "Set Location"
   }
 }

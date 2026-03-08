@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Star, Edit2, Save, Loader2, CalendarIcon, Camera } from "lucide-react";
+import { CheckCircle, Star, Edit2, Save, Loader2, CalendarIcon, Camera, MapPin } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NotificationBell from "@/components/NotificationBell";
 
@@ -30,7 +30,7 @@ const ProviderDashboard = () => {
   const [uploading, setUploading] = useState(false);
 
   const [form, setForm] = useState({
-    name: "", age: "", experience: "", contact: "", serviceType: "", city: "", area: "", bio: "", available: true,
+    name: "", age: "", experience: "", contact: "", serviceType: "", city: "", area: "", bio: "", available: true, latitude: "", longitude: "",
   });
 
   useEffect(() => {
@@ -46,6 +46,7 @@ const ProviderDashboard = () => {
         name: p?.name || user.name || "", age: s?.age?.toString() || "", experience: s?.experience?.toString() || "",
         contact: p?.contact || "", serviceType: s?.service_type || "", city: p?.city || "", area: p?.area || "",
         bio: s?.bio || "", available: s?.available ?? true,
+        latitude: s?.latitude?.toString() || "", longitude: s?.longitude?.toString() || "",
       });
       if (p?.photo_url) setPhotoUrl(p.photo_url);
       if (s) { setServiceProfileId(s.id); setProfileSaved(true); setEditing(false); }
@@ -95,10 +96,16 @@ const ProviderDashboard = () => {
     e.preventDefault();
     setSaving(true);
     await supabase.from("profiles").update({ name: form.name, contact: form.contact, city: form.city, area: form.area, profile_complete: true } as any).eq("user_id", user.id);
+    const spData = {
+      service_type: form.serviceType, age: parseInt(form.age) || null, experience: parseInt(form.experience) || 0,
+      bio: form.bio, available: form.available,
+      latitude: form.latitude ? parseFloat(form.latitude) : null,
+      longitude: form.longitude ? parseFloat(form.longitude) : null,
+    };
     if (serviceProfileId) {
-      await supabase.from("service_profiles").update({ service_type: form.serviceType, age: parseInt(form.age) || null, experience: parseInt(form.experience) || 0, bio: form.bio, available: form.available } as any).eq("id", serviceProfileId);
+      await supabase.from("service_profiles").update(spData as any).eq("id", serviceProfileId);
     } else {
-      const { data } = await supabase.from("service_profiles").insert({ user_id: user.id, service_type: form.serviceType, age: parseInt(form.age) || null, experience: parseInt(form.experience) || 0, bio: form.bio, available: form.available } as any).select().maybeSingle();
+      const { data } = await supabase.from("service_profiles").insert({ user_id: user.id, ...spData } as any).select().maybeSingle();
       if (data) setServiceProfileId((data as any).id);
     }
     await refreshUser();
@@ -233,6 +240,25 @@ const ProviderDashboard = () => {
                   </div>
                   <div><Label>{t("providerDashboard.city")}</Label><Input value={form.city} onChange={(e) => handleChange("city", e.target.value)} required /></div>
                   <div className="sm:col-span-2"><Label>{t("providerDashboard.area")}</Label><Input value={form.area} onChange={(e) => handleChange("area", e.target.value)} placeholder={t("providerDashboard.areaPlaceholder")} required /></div>
+                  <div className="sm:col-span-2">
+                    <div className="flex items-center gap-2 mb-1">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <Label className="mb-0">{t("providerDashboard.location")}</Label>
+                      <Button type="button" variant="outline" size="sm" className="ml-auto h-7 text-xs" onClick={() => {
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition((pos) => {
+                            handleChange("latitude", pos.coords.latitude.toString());
+                            handleChange("longitude", pos.coords.longitude.toString());
+                          });
+                        }
+                      }}>{t("providerDashboard.detectLocation")}</Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input type="number" step="any" value={form.latitude} onChange={(e) => handleChange("latitude", e.target.value)} placeholder={t("providerDashboard.latitude")} />
+                      <Input type="number" step="any" value={form.longitude} onChange={(e) => handleChange("longitude", e.target.value)} placeholder={t("providerDashboard.longitude")} />
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">{t("providerDashboard.locationHint")}</p>
+                  </div>
                   <div className="sm:col-span-2"><Label>{t("providerDashboard.bio")}</Label><Textarea value={form.bio} onChange={(e) => handleChange("bio", e.target.value)} placeholder={t("providerDashboard.bioPlaceholder")} required /></div>
                 </div>
                 <div className="flex items-center justify-between rounded-lg border border-border p-3">

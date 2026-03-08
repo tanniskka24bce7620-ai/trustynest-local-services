@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ServiceProvider, SERVICE_ICONS } from "@/lib/mockData";
-import { Star, MapPin, Clock, CheckCircle, Phone } from "lucide-react";
+import { Star, MapPin, Clock, CheckCircle, Phone, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -35,6 +35,11 @@ const ServiceProviderCard = ({ provider, onViewProfile }: Props) => {
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {provider.area}, {provider.city}</span>
             <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {provider.experience} {t("providerCard.yrsExp")}</span>
+            {provider.distance != null && (
+              <span className="flex items-center gap-1 font-medium text-primary">
+                <Navigation className="h-3 w-3" /> {provider.distance.toFixed(1)} km
+              </span>
+            )}
           </div>
           <div className="mt-2 flex items-center gap-1">
             <Star className="h-4 w-4 fill-warning text-warning" />

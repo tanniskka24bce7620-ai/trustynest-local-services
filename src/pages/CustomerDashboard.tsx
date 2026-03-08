@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/authContext";
 import { useNavigate } from "react-router-dom";
@@ -11,13 +11,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal, CheckCircle, Loader2, CalendarIcon } from "lucide-react";
+import { Search, SlidersHorizontal, CheckCircle, Loader2, CalendarIcon, MapPin, List as ListIcon, Map as MapIcon, Navigation, LocateFixed } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useGeolocation, getDistanceKm } from "@/hooks/useGeolocation";
+import { Badge } from "@/components/ui/badge";
+
+const ProviderMapView = lazy(() => import("@/components/ProviderMapView"));
 
 const CustomerDashboard = () => {
   const { t } = useTranslation();
   const { user, loading: authLoading, refreshUser } = useAuth();
   const navigate = useNavigate();
+  const { position, loading: geoLoading, requestLocation, denied } = useGeolocation();
+
   const [profileDone, setProfileDone] = useState(false);
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
@@ -30,8 +36,9 @@ const CustomerDashboard = () => {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [ratingFilter, setRatingFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("rating");
+  const [sortBy, setSortBy] = useState<string>("distance");
   const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
 
   useEffect(() => {
     if (authLoading) return;
@@ -68,6 +75,7 @@ const CustomerDashboard = () => {
           contact: profile?.contact || "", serviceType: sp.service_type, city: profile?.city || "", area: profile?.area || "",
           bio: sp.bio || "", photo: profile?.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.name || "U")}&background=3b82f6&color=fff`,
           available: sp.available, verified: profile?.aadhaar_verified || false, rating: parseFloat(sp.rating) || 0, reviewCount: sp.review_count || 0,
+          latitude: sp.latitude, longitude: sp.longitude,
           reviews: reviews.map((r: any) => ({ id: r.id, customerName: "Customer", rating: r.rating, comment: r.comment || "", date: r.created_at?.slice(0, 10) || "" })),
         };
       });
@@ -110,19 +118,38 @@ const CustomerDashboard = () => {
     );
   }
 
-  let filtered = providers.filter((p) => {
+  // Calculate distances
+  const withDistance = providers.map((p) => {
+    if (position && p.latitude && p.longitude) {
+      return { ...p, distance: getDistanceKm(position.latitude, position.longitude, p.latitude, p.longitude) };
+    }
+    return { ...p, distance: undefined };
+  });
+
+  // Filter
+  let filtered = withDistance.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.serviceType.toLowerCase().includes(search.toLowerCase()) || p.area.toLowerCase().includes(search.toLowerCase()) || p.city.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = categoryFilter === "all" || p.serviceType === categoryFilter;
     const matchesRating = ratingFilter === "all" || p.rating >= parseFloat(ratingFilter);
     return matchesSearch && matchesCategory && matchesRating;
   });
 
+  // Sort
   filtered.sort((a, b) => {
+    if (sortBy === "distance") {
+      if (a.distance == null && b.distance == null) return 0;
+      if (a.distance == null) return 1;
+      if (b.distance == null) return -1;
+      return a.distance - b.distance;
+    }
     if (sortBy === "rating") return b.rating - a.rating;
     if (sortBy === "reviews") return b.reviewCount - a.reviewCount;
     if (sortBy === "experience") return b.experience - a.experience;
     return 0;
   });
+
+  const nearbyProviders = filtered.filter((p) => p.distance != null && p.distance <= 5);
+  const mapCenter: [number, number] = position ? [position.latitude, position.longitude] : [20.5937, 78.9629];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -136,6 +163,19 @@ const CustomerDashboard = () => {
         </div>
       </div>
 
+      {/* Location status */}
+      <div className="mb-4 flex items-center gap-2">
+        {geoLoading ? (
+          <Badge variant="outline" className="gap-1"><Loader2 className="h-3 w-3 animate-spin" /> {t("location.detecting")}</Badge>
+        ) : position ? (
+          <Badge variant="outline" className="gap-1 border-success/30 bg-success/10 text-success"><LocateFixed className="h-3 w-3" /> {t("location.detected")}</Badge>
+        ) : (
+          <Button variant="outline" size="sm" onClick={requestLocation} className="gap-1">
+            <MapPin className="h-3 w-3" /> {denied ? t("location.manualSelect") : t("location.enable")}
+          </Button>
+        )}
+      </div>
+
       <Tabs defaultValue="browse" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="browse"><Search className="h-4 w-4 mr-1" /> {t("customerDashboard.browse")}</TabsTrigger>
@@ -145,10 +185,21 @@ const CustomerDashboard = () => {
         <TabsContent value="bookings"><BookingStatusTracker /></TabsContent>
 
         <TabsContent value="browse">
+          {/* Search & Filter bar */}
           <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-soft">
-            <div className="flex items-center gap-2 mb-4">
-              <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{t("customerDashboard.searchFilter")}</span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">{t("customerDashboard.searchFilter")}</span>
+              </div>
+              <div className="flex items-center gap-1 rounded-lg border border-border p-0.5">
+                <Button variant={viewMode === "list" ? "default" : "ghost"} size="sm" className="h-7 px-2" onClick={() => setViewMode("list")}>
+                  <ListIcon className="h-4 w-4" />
+                </Button>
+                <Button variant={viewMode === "map" ? "default" : "ghost"} size="sm" className="h-7 px-2" onClick={() => setViewMode("map")}>
+                  <MapIcon className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="relative">
@@ -173,6 +224,7 @@ const CustomerDashboard = () => {
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger><SelectValue placeholder={t("common.sortBy")} /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="distance"><Navigation className="inline h-3 w-3 mr-1" />{t("customerDashboard.nearestFirst")}</SelectItem>
                   <SelectItem value="rating">{t("customerDashboard.highestRating")}</SelectItem>
                   <SelectItem value="reviews">{t("customerDashboard.mostReviews")}</SelectItem>
                   <SelectItem value="experience">{t("customerDashboard.mostExperience")}</SelectItem>
@@ -183,8 +235,28 @@ const CustomerDashboard = () => {
 
           {loadingProviders ? (
             <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+          ) : viewMode === "map" ? (
+            <Suspense fallback={<div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+              <ProviderMapView providers={filtered} center={mapCenter} />
+            </Suspense>
           ) : (
             <>
+              {/* Near You section */}
+              {nearbyProviders.length > 0 && (
+                <div className="mb-6">
+                  <div className="mb-3 flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg font-semibold">{t("customerDashboard.nearYou")}</h2>
+                    <Badge variant="secondary" className="text-xs">{t("customerDashboard.within5km")}</Badge>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {nearbyProviders.slice(0, 4).map((p) => (
+                      <ServiceProviderCard key={p.id} provider={p} onViewProfile={setSelectedProvider} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <p className="mb-4 text-sm text-muted-foreground">{t("customerDashboard.providersFound", { count: filtered.length })}</p>
               <div className="grid gap-4 md:grid-cols-2">
                 {filtered.map((p) => (<ServiceProviderCard key={p.id} provider={p} onViewProfile={setSelectedProvider} />))}
