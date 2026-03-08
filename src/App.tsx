@@ -18,6 +18,7 @@ import BookingPage from "./pages/BookingPage";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import HallOfFame from "./pages/HallOfFame";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/book" element={<BookingPage />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/hall-of-fame" element={<HallOfFame />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
