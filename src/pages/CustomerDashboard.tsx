@@ -232,7 +232,33 @@ const CustomerDashboard = () => {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder={t("customerDashboard.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+                <Input placeholder={voice.isListening ? t("voiceSearch.listening") : t("customerDashboard.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-10" />
+                {voice.supported && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={voice.isListening ? voice.stopListening : voice.startListening}
+                          className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors ${
+                            voice.isListening
+                              ? "bg-destructive/10 text-destructive animate-pulse"
+                              : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                          }`}
+                          aria-label={voice.isListening ? t("voiceSearch.stop") : t("voiceSearch.start")}
+                        >
+                          {voice.isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {voice.isListening ? t("voiceSearch.stop") : t("voiceSearch.start")}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                {voice.error && (
+                  <p className="absolute -bottom-5 left-0 text-xs text-destructive">{t(voice.error)}</p>
+                )}
               </div>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger><SelectValue placeholder={t("common.category")} /></SelectTrigger>
