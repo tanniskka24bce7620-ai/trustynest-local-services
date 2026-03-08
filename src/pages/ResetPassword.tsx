@@ -78,7 +78,7 @@ const ResetPassword = () => {
         <div className="rounded-2xl border border-border bg-card p-8 shadow-card">
           {success ? (
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-green-500">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-green-500/90">
                 <CheckCircle className="h-7 w-7 text-primary-foreground" />
               </div>
               <h1 className="text-2xl font-bold">{t("auth.passwordUpdated")}</h1>
