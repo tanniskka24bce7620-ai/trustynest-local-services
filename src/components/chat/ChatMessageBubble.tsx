@@ -148,7 +148,19 @@ const ChatMessageBubble = ({ msg, isMine, myLanguage, showOriginal, onToggleOrig
               "mt-1.5 pt-1.5 border-t text-xs",
               isMine ? "border-primary-foreground/20 text-primary-foreground/80" : "border-border text-muted-foreground"
             )}>
-              <span className="font-medium">Translation ({LANG_NAMES[onDemandTranslation.lang]}):</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-medium">Translation ({LANG_NAMES[onDemandTranslation.lang]}):</span>
+                <button
+                  onClick={() => speakText(onDemandTranslation.text, onDemandTranslation.lang)}
+                  className={cn(
+                    "inline-flex items-center gap-0.5 hover:underline",
+                    isMine ? "text-primary-foreground/70" : "text-muted-foreground"
+                  )}
+                  title="Listen to translation"
+                >
+                  {speaking ? <Loader2 className="h-3 w-3 animate-spin" /> : <Volume2 className="h-3 w-3" />}
+                </button>
+              </div>
               <p className="mt-0.5 whitespace-pre-wrap">{onDemandTranslation.text}</p>
             </div>
           )}
