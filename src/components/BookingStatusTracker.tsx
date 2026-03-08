@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { CalendarIcon, Clock, Loader2, X, RefreshCw, ShieldAlert, MapPin } from "lucide-react";
+import { CalendarIcon, Clock, Loader2, X, RefreshCw, ShieldAlert, MapPin, MessageCircle } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, isBefore, startOfDay, addDays } from "date-fns";
