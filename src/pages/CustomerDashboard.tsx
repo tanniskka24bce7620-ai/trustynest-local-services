@@ -323,7 +323,7 @@ const CustomerDashboard = () => {
                   <SelectItem value="rating">{t("customerDashboard.highestRating")}</SelectItem>
                   <SelectItem value="reviews">{t("customerDashboard.mostReviews")}</SelectItem>
                   <SelectItem value="experience">{t("customerDashboard.mostExperience")}</SelectItem>
-                </SelectContent>
+                  <SelectItem value="trust">{t("trustScore.sortByTrust")}</SelectItem>
               </Select>
             </div>
           </div>
