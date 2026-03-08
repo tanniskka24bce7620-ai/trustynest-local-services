@@ -308,5 +308,22 @@
     "pending": "Emergency Pending",
     "noProviders": "No emergency providers available nearby.",
     "noProvidersDesc": "Try disabling emergency mode or check back later."
+  },
+  "leaderboard": {
+    "title": "🏆 Monthly Top Providers",
+    "subtitle": "Top Rated Service Providers This Month",
+    "rating": "Rating",
+    "jobs": "Jobs",
+    "reviews": "Reviews",
+    "score": "Score",
+    "topProvider": "Top Provider",
+    "transparency": "Rankings are calculated based on ratings, completed jobs, and customer feedback to ensure fair and transparent recognition of top providers.",
+    "hallOfFame": "View Hall of Fame"
+  },
+  "hallOfFame": {
+    "title": "Hall of Fame",
+    "subtitle": "Celebrating our top service providers from past months",
+    "empty": "No winners recorded yet",
+    "emptyDesc": "Hall of Fame winners will appear here at the end of each month."
   }
 }
