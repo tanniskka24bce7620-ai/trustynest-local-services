@@ -52,7 +52,15 @@ const ProviderDashboard = () => {
         emergencyAvailable: s?.emergency_available ?? false,
       });
       if (p?.photo_url) setPhotoUrl(p.photo_url);
-      if (s) { setServiceProfileId(s.id); setProfileSaved(true); setEditing(false); }
+      if (s) {
+        setServiceProfileId(s.id); setProfileSaved(true); setEditing(false);
+        // Fetch trust score
+        const { data: ts } = await supabase.rpc("get_trust_scores", { provider_ids: [s.id] });
+        if (ts && (ts as any[]).length > 0) {
+          const t = (ts as any[])[0];
+          setTrustData({ trust_score: t.trust_score, completed_jobs: Number(t.completed_jobs), positive_reviews: Number(t.positive_reviews), complaints_count: Number(t.complaints_count), cancellations: Number(t.cancellations), average_rating: Number(t.average_rating) });
+        }
+      }
     };
     load();
   }, [user, authLoading, navigate]);
