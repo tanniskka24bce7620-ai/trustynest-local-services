@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/authContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { SERVICE_TYPES, SERVICE_ICONS, ServiceProvider } from "@/lib/mockData";
+import { SERVICE_TYPES, SERVICE_ICONS, ServiceProvider, EMERGENCY_SERVICE_TYPES } from "@/lib/mockData";
 import ServiceProviderCard from "@/components/ServiceProviderCard";
 import ProviderProfile from "@/components/ProviderProfile";
 import BookingStatusTracker from "@/components/BookingStatusTracker";
