@@ -11,8 +11,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ShieldAlert, Search, Loader2, Eye, ExternalLink, AlertTriangle } from "lucide-react";
+import { ShieldAlert, Search, Loader2, Eye, ExternalLink, AlertTriangle, Shield } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+
+interface TrustProvider {
+  service_profile_id: string;
+  user_id: string;
+  provider_name: string;
+  service_type: string;
+  trust_score: number;
+  completed_jobs: number;
+  positive_reviews: number;
+  complaints_count: number;
+  cancellations: number;
+  average_rating: number;
+}
 
 const STATUS_STYLES: Record<string, string> = {
   pending_review: "bg-warning/10 text-warning border-warning/30",
