@@ -275,6 +275,15 @@ const ProviderDashboard = () => {
                   <span className="text-sm font-medium">{t("providerDashboard.available")}</span>
                   <Switch checked={form.available} onCheckedChange={(v) => handleChange("available", v)} />
                 </div>
+                {EMERGENCY_SERVICE_TYPES.includes(form.serviceType) && (
+                  <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+                    <div className="flex items-center gap-2">
+                      <Siren className="h-4 w-4 text-destructive" />
+                      <span className="text-sm font-medium">{t("emergency.enableToggle")}</span>
+                    </div>
+                    <Switch checked={form.emergencyAvailable} onCheckedChange={(v) => handleChange("emergencyAvailable", v)} />
+                  </div>
+                )}
                 <Button type="submit" className="w-full" size="lg" disabled={saving}>
                   {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   {t("providerDashboard.saveProfile")}
