@@ -161,7 +161,8 @@ const CustomerDashboard = () => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.serviceType.toLowerCase().includes(search.toLowerCase()) || p.area.toLowerCase().includes(search.toLowerCase()) || p.city.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = categoryFilter === "all" || p.serviceType === categoryFilter;
     const matchesRating = ratingFilter === "all" || p.rating >= parseFloat(ratingFilter);
-    return matchesSearch && matchesCategory && matchesRating;
+    const matchesEmergency = !emergencyMode || (p.emergencyAvailable && p.available && EMERGENCY_SERVICE_TYPES.includes(p.serviceType) && (p.distance == null || p.distance <= 10));
+    return matchesSearch && matchesCategory && matchesRating && matchesEmergency;
   });
 
   // Sort
