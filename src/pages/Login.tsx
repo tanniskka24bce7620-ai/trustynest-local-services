@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Wrench, Users, Loader2 } from "lucide-react";
+import servnestLogo from "@/assets/servnest-logo.png";
 
 const Login = () => {
   const { t } = useTranslation();
@@ -38,9 +39,7 @@ const Login = () => {
       <div className="w-full max-w-md animate-scale-in">
         <div className="rounded-2xl border border-border bg-card p-8 shadow-card">
           <div className="mb-6 flex flex-col items-center text-center">
-            <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-xl ${isProvider ? "gradient-hero" : "gradient-success"}`}>
-              {isProvider ? <Wrench className="h-7 w-7 text-primary-foreground" /> : <Users className="h-7 w-7 text-primary-foreground" />}
-            </div>
+            <img src={servnestLogo} alt="ServNest" className="mb-4 h-20 w-auto" />
             <h1 className="text-2xl font-bold">
               {isProvider ? t("auth.loginAsProvider") : t("auth.loginAsCustomer")}
             </h1>

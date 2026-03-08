@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Shield, Users, Search, Star, Wrench, ChevronRight } from "lucide-react";
 import { SERVICE_ICONS } from "@/lib/mockData";
 import heroBanner from "@/assets/hero-banner.jpg";
+import servnestLogo from "@/assets/servnest-logo.png";
 import LeaderboardSection from "@/components/LeaderboardSection";
 import ImageServiceRequest from "@/components/ImageServiceRequest";
 
@@ -102,18 +103,21 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card py-8">
-        <div className="container mx-auto flex flex-col items-center gap-4 px-4 text-center md:flex-row md:justify-between md:text-left">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-hero">
-              <span className="text-sm font-bold text-primary-foreground">S</span>
-            </div>
-            <span className="font-bold text-gradient">ServNest</span>
+      <footer className="border-t border-border bg-card py-10">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center gap-4 text-center mb-6">
+            <img src={servnestLogo} alt="ServNest" className="h-16 w-auto" />
+            <p className="max-w-md text-sm text-muted-foreground">
+              ServNest – Connecting you with trusted home service professionals.
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">{t("footer.copyright")}</p>
-          <div className="flex gap-4 text-sm text-muted-foreground">
-            <Link to="/about" className="hover:text-primary">{t("nav.about")}</Link>
-            <Link to="/contact" className="hover:text-primary">{t("nav.contact")}</Link>
+          <div className="flex flex-col items-center gap-4 border-t border-border pt-6 md:flex-row md:justify-between">
+            <p className="text-sm text-muted-foreground">{t("footer.copyright")}</p>
+            <div className="flex gap-4 text-sm text-muted-foreground">
+              <Link to="/about" className="hover:text-primary">{t("nav.about")}</Link>
+              <Link to="/contact" className="hover:text-primary">{t("nav.contact")}</Link>
+              <Link to="/hall-of-fame" className="hover:text-primary">Hall of Fame</Link>
+            </div>
           </div>
         </div>
       </footer>

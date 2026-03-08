@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import LanguageSelector from "@/components/LanguageSelector";
+import servnestLogo from "@/assets/servnest-logo.png";
 
 const Navbar = () => {
   const { t } = useTranslation();
@@ -27,9 +28,7 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-hero">
-            <span className="text-lg font-bold text-primary-foreground">S</span>
-          </div>
+          <img src={servnestLogo} alt="ServNest" className="h-10 w-auto md:h-12" />
           <span className="text-xl font-bold text-gradient">ServNest</span>
         </Link>
 
