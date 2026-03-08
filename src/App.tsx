@@ -22,6 +22,7 @@ import HallOfFame from "./pages/HallOfFame";
 import AdminDashboard from "./pages/AdminDashboard";
 import TrackingPage from "./pages/TrackingPage";
 import ChatPage from "./pages/ChatPage";
+import ChatListPage from "./pages/ChatListPage";
 
 const queryClient = new QueryClient();
 
