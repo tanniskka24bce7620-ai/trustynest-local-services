@@ -31,7 +31,7 @@ const ProviderBookings = () => {
   const loadBookings = async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase.from("bookings").select("*").eq("provider_user_id", user.id).order("booking_date", { ascending: true });
+    const { data } = await supabase.from("bookings").select("*").eq("provider_user_id", user.id).order("is_emergency", { ascending: false }).order("booking_date", { ascending: true });
     if (!data || (data as any[]).length === 0) { setBookings([]); setLoading(false); return; }
 
     const customerIds = [...new Set((data as any[]).map((b: any) => b.customer_id))];
