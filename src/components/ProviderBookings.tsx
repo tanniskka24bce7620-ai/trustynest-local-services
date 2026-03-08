@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Clock, Loader2, Check, X } from "lucide-react";
+import { CalendarIcon, Clock, Loader2, Check, X, Siren } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<string, string> = {
