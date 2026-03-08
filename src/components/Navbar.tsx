@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/authContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, Menu, X } from "lucide-react";
+import { LogOut, Menu, X, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import LanguageSelector from "@/components/LanguageSelector";
 import servnestLogo from "@/assets/servnest-logo.png";
