@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, CheckCircle, ArrowLeft, CalendarIcon, Clock, Loader2, PartyPopper } from "lucide-react";
+import { Star, MapPin, CheckCircle, ArrowLeft, CalendarIcon, Clock, Loader2, PartyPopper, Siren } from "lucide-react";
 import { format, addDays, isBefore, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 
