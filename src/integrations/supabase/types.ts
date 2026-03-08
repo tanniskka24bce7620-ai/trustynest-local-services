@@ -76,6 +76,78 @@ export type Database = {
           },
         ]
       }
+      complaints: {
+        Row: {
+          admin_notes: string | null
+          booking_id: string | null
+          complaint_code: string
+          complaint_type: string
+          created_at: string
+          customer_id: string
+          description: string
+          evidence_urls: string[] | null
+          id: string
+          provider_user_id: string
+          resolution_action: string | null
+          resolution_notes: string | null
+          service_profile_id: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          booking_id?: string | null
+          complaint_code?: string
+          complaint_type: string
+          created_at?: string
+          customer_id: string
+          description: string
+          evidence_urls?: string[] | null
+          id?: string
+          provider_user_id: string
+          resolution_action?: string | null
+          resolution_notes?: string | null
+          service_profile_id: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          booking_id?: string | null
+          complaint_code?: string
+          complaint_type?: string
+          created_at?: string
+          customer_id?: string
+          description?: string
+          evidence_urls?: string[] | null
+          id?: string
+          provider_user_id?: string
+          resolution_action?: string | null
+          resolution_notes?: string | null
+          service_profile_id?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaints_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "complaints_service_profile_id_fkey"
+            columns: ["service_profile_id"]
+            isOneToOne: false
+            referencedRelation: "service_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monthly_winners: {
         Row: {
           average_rating: number
