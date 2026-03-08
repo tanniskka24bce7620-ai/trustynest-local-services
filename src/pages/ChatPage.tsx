@@ -46,6 +46,7 @@ const ChatPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { notify } = useChatNotifications();
+  const { partnerOnline } = usePresence(bookingId, user?.id);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
