@@ -22,6 +22,9 @@ export interface ServiceProvider {
   rating: number;
   reviewCount: number;
   reviews: Review[];
+  latitude?: number | null;
+  longitude?: number | null;
+  distance?: number;
 }
 
 export interface Review {
