@@ -324,6 +324,7 @@ const CustomerDashboard = () => {
                   <SelectItem value="reviews">{t("customerDashboard.mostReviews")}</SelectItem>
                   <SelectItem value="experience">{t("customerDashboard.mostExperience")}</SelectItem>
                   <SelectItem value="trust">{t("trustScore.sortByTrust")}</SelectItem>
+                </SelectContent>
               </Select>
             </div>
           </div>
