@@ -240,6 +240,8 @@ export type Database = {
           created_at: string
           experience: number
           id: string
+          latitude: number | null
+          longitude: number | null
           rating: number
           review_count: number
           service_type: string
@@ -253,6 +255,8 @@ export type Database = {
           created_at?: string
           experience?: number
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           rating?: number
           review_count?: number
           service_type: string
@@ -266,6 +270,8 @@ export type Database = {
           created_at?: string
           experience?: number
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           rating?: number
           review_count?: number
           service_type?: string
