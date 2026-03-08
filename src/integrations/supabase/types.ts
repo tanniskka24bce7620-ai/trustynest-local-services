@@ -76,6 +76,62 @@ export type Database = {
           },
         ]
       }
+      monthly_winners: {
+        Row: {
+          average_rating: number
+          created_at: string
+          id: string
+          jobs_completed: number
+          month_year: string
+          photo_url: string | null
+          positive_reviews: number
+          provider_name: string
+          rank: number
+          score: number
+          service_profile_id: string
+          service_type: string
+          user_id: string
+        }
+        Insert: {
+          average_rating?: number
+          created_at?: string
+          id?: string
+          jobs_completed?: number
+          month_year: string
+          photo_url?: string | null
+          positive_reviews?: number
+          provider_name?: string
+          rank: number
+          score?: number
+          service_profile_id: string
+          service_type?: string
+          user_id: string
+        }
+        Update: {
+          average_rating?: number
+          created_at?: string
+          id?: string
+          jobs_completed?: number
+          month_year?: string
+          photo_url?: string | null
+          positive_reviews?: number
+          provider_name?: string
+          rank?: number
+          score?: number
+          service_profile_id?: string
+          service_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_winners_service_profile_id_fkey"
+            columns: ["service_profile_id"]
+            isOneToOne: false
+            referencedRelation: "service_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           booking_id: string | null
@@ -318,6 +374,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_leaderboard: {
+        Args: { result_limit?: number }
+        Returns: {
+          average_rating: number
+          jobs_completed: number
+          photo_url: string
+          positive_reviews: number
+          provider_name: string
+          rank: number
+          score: number
+          service_profile_id: string
+          service_type: string
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
