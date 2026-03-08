@@ -6,6 +6,8 @@ export const SERVICE_TYPES = [
 
 export type ServiceType = typeof SERVICE_TYPES[number];
 
+export const EMERGENCY_SERVICE_TYPES: readonly string[] = ["Plumber", "Electrician", "Mechanic"];
+
 export interface ServiceProvider {
   id: string;
   name: string;
@@ -25,6 +27,7 @@ export interface ServiceProvider {
   latitude?: number | null;
   longitude?: number | null;
   distance?: number;
+  emergencyAvailable?: boolean;
 }
 
 export interface Review {

@@ -1,20 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ServiceProvider, SERVICE_ICONS } from "@/lib/mockData";
-import { Star, MapPin, Clock, CheckCircle, Phone, Navigation } from "lucide-react";
+import { Star, MapPin, Clock, CheckCircle, Phone, Navigation, Siren } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface Props {
   provider: ServiceProvider;
   onViewProfile: (provider: ServiceProvider) => void;
+  emergencyMode?: boolean;
 }
 
-const ServiceProviderCard = ({ provider, onViewProfile }: Props) => {
+const ServiceProviderCard = ({ provider, onViewProfile, emergencyMode }: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
-    <div className="group rounded-xl border border-border bg-card p-5 shadow-soft transition-all hover:shadow-card">
+    <div className={`group rounded-xl border bg-card p-5 shadow-soft transition-all hover:shadow-card ${emergencyMode && provider.emergencyAvailable ? "border-destructive/40 ring-1 ring-destructive/20" : "border-border"}`}>
       <div className="flex gap-4">
         <img src={provider.photo} alt={provider.name} className="h-20 w-20 rounded-xl object-cover" />
         <div className="flex-1 min-w-0">
@@ -26,11 +27,18 @@ const ServiceProviderCard = ({ provider, onViewProfile }: Props) => {
                 <span>{provider.serviceType}</span>
               </div>
             </div>
-            {provider.verified && (
-              <Badge variant="outline" className="shrink-0 gap-1 border-success/30 bg-success/10 text-success">
-                <CheckCircle className="h-3 w-3" /> {t("providerCard.verified")}
-              </Badge>
-            )}
+            <div className="flex flex-col items-end gap-1 shrink-0">
+              {provider.verified && (
+                <Badge variant="outline" className="gap-1 border-success/30 bg-success/10 text-success">
+                  <CheckCircle className="h-3 w-3" /> {t("providerCard.verified")}
+                </Badge>
+              )}
+              {provider.emergencyAvailable && (
+                <Badge variant="outline" className="gap-1 border-destructive/30 bg-destructive/10 text-destructive">
+                  <Siren className="h-3 w-3" /> {t("emergency.badge")}
+                </Badge>
+              )}
+            </div>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {provider.area}, {provider.city}</span>
@@ -50,7 +58,13 @@ const ServiceProviderCard = ({ provider, onViewProfile }: Props) => {
       </div>
       <p className="mt-3 text-sm text-muted-foreground line-clamp-2">{provider.bio}</p>
       <div className="mt-4 flex items-center gap-2">
-        <Button size="sm" className="flex-1" onClick={() => navigate(`/book?sp=${provider.id}`)}>{t("providerCard.bookService")}</Button>
+        {emergencyMode && provider.emergencyAvailable ? (
+          <Button size="sm" className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => navigate(`/book?sp=${provider.id}&emergency=true`)}>
+            <Siren className="mr-1 h-4 w-4" /> {t("emergency.bookNow")}
+          </Button>
+        ) : (
+          <Button size="sm" className="flex-1" onClick={() => navigate(`/book?sp=${provider.id}`)}>{t("providerCard.bookService")}</Button>
+        )}
         <Button size="sm" variant="outline" onClick={() => onViewProfile(provider)}>{t("providerCard.viewProfile")}</Button>
         <a href={`tel:${provider.contact}`}><Button size="sm" variant="ghost"><Phone className="h-4 w-4" /></Button></a>
       </div>
