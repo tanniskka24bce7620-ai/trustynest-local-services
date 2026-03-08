@@ -11,10 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal, CheckCircle, Loader2, CalendarIcon, MapPin, List as ListIcon, Map as MapIcon, Navigation, LocateFixed } from "lucide-react";
+import { Search, SlidersHorizontal, CheckCircle, Loader2, CalendarIcon, MapPin, List as ListIcon, Map as MapIcon, Navigation, LocateFixed, Mic, MicOff } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGeolocation, getDistanceKm } from "@/hooks/useGeolocation";
 import { Badge } from "@/components/ui/badge";
+import { useVoiceSearch } from "@/hooks/useVoiceSearch";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 const ProviderMapView = lazy(() => import("@/components/ProviderMapView"));
 
@@ -39,6 +41,32 @@ const CustomerDashboard = () => {
   const [sortBy, setSortBy] = useState<string>("distance");
   const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const voice = useVoiceSearch();
+
+  // Apply voice search results
+  useEffect(() => {
+    if (!voice.transcript) return;
+    // Clean transcript: remove "near me" style phrases for search text
+    let cleaned = voice.transcript;
+    ["near me", "nearby", "near by", "around me", "मेरे पास", "पास में", "आस पास", "என் அருகில்", "அருகில்", "నా దగ్గర", "సమీపంలో"]
+      .forEach((kw) => { cleaned = cleaned.replace(new RegExp(kw, "gi"), ""); });
+    ["book a", "find", "show", "search for", "search", "book"]
+      .forEach((kw) => { cleaned = cleaned.replace(new RegExp(`^${kw}\\s+`, "i"), ""); });
+    cleaned = cleaned.trim();
+
+    if (voice.matchedCategory) {
+      setCategoryFilter(voice.matchedCategory);
+      setSearch("");
+    } else if (cleaned) {
+      setSearch(cleaned);
+      setCategoryFilter("all");
+    }
+
+    if (voice.wantsNearby) {
+      setSortBy("distance");
+      if (!position) requestLocation();
+    }
+  }, [voice.transcript, voice.matchedCategory, voice.wantsNearby]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -204,7 +232,33 @@ const CustomerDashboard = () => {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder={t("customerDashboard.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+                <Input placeholder={voice.isListening ? t("voiceSearch.listening") : t("customerDashboard.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-10" />
+                {voice.supported && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={voice.isListening ? voice.stopListening : voice.startListening}
+                          className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors ${
+                            voice.isListening
+                              ? "bg-destructive/10 text-destructive animate-pulse"
+                              : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                          }`}
+                          aria-label={voice.isListening ? t("voiceSearch.stop") : t("voiceSearch.start")}
+                        >
+                          {voice.isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {voice.isListening ? t("voiceSearch.stop") : t("voiceSearch.start")}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                {voice.error && (
+                  <p className="absolute -bottom-5 left-0 text-xs text-destructive">{t(voice.error)}</p>
+                )}
               </div>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger><SelectValue placeholder={t("common.category")} /></SelectTrigger>

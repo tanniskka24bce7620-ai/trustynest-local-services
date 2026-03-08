@@ -284,5 +284,14 @@
     "detected": "Location detected",
     "enable": "Enable Location",
     "manualSelect": "Set Location"
+  },
+  "voiceSearch": {
+    "start": "Search by voice",
+    "stop": "Stop listening",
+    "listening": "Listening… Speak your service request",
+    "notSupported": "Voice search is not supported in your browser",
+    "micDenied": "Microphone permission denied. Please allow access.",
+    "noSpeech": "Voice not recognized. Please try again.",
+    "error": "Voice not recognized. Please try again."
   }
 }
