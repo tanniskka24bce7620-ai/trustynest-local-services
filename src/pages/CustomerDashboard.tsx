@@ -15,6 +15,8 @@ import { Search, SlidersHorizontal, CheckCircle, Loader2, CalendarIcon, MapPin, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGeolocation, getDistanceKm } from "@/hooks/useGeolocation";
 import { Badge } from "@/components/ui/badge";
+import { useVoiceSearch } from "@/hooks/useVoiceSearch";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 const ProviderMapView = lazy(() => import("@/components/ProviderMapView"));
 
