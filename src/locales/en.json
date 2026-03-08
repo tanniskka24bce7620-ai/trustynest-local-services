@@ -392,5 +392,29 @@
     "loginRequired": "Please log in to upload photos and find services.",
     "analysisFailed": "Could not analyze image. Please try again.",
     "privacyNote": "Your uploaded images are analyzed securely and used only for service matching. We respect your privacy."
+  },
+  "trustScore": {
+    "title": "Trust Score",
+    "outOf100": "out of 100",
+    "ratingScore": "Rating Score",
+    "completedJobs": "Completed Jobs",
+    "positiveReviews": "Positive Reviews",
+    "complaints": "Complaints",
+    "cancellations": "Cancellations",
+    "disclaimer": "Trust Score is calculated automatically based on service performance and customer feedback to help customers choose reliable providers.",
+    "excellent": "Excellent",
+    "veryReliable": "Very Reliable",
+    "good": "Good",
+    "average": "Average",
+    "needsImprovement": "Needs Improvement",
+    "improveTip": "Improve your trust score by completing jobs on time and maintaining high customer ratings.",
+    "lowTrustWarning": "Low Trust Warning",
+    "performance": "Performance & Trust Score",
+    "sortByTrust": "Highest Trust Score",
+    "trustMonitoring": "Trust Monitoring",
+    "riskLevel": "Risk Level",
+    "highRisk": "High Risk",
+    "mediumRisk": "Medium Risk",
+    "lowRisk": "Low Risk"
   }
 }
