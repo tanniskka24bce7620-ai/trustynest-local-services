@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import LanguageSelector from "@/components/LanguageSelector";
+import servnestLogo from "@/assets/servnest-logo.png";
 
 const Navbar = () => {
   const { t } = useTranslation();
