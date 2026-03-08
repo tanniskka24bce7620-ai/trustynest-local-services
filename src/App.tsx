@@ -22,6 +22,7 @@ import HallOfFame from "./pages/HallOfFame";
 import AdminDashboard from "./pages/AdminDashboard";
 import TrackingPage from "./pages/TrackingPage";
 import ChatPage from "./pages/ChatPage";
+import ChatListPage from "./pages/ChatListPage";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/hall-of-fame" element={<HallOfFame />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/track/:bookingId" element={<TrackingPage />} />
+            <Route path="/chats" element={<ChatListPage />} />
             <Route path="/chat/:bookingId" element={<ChatPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

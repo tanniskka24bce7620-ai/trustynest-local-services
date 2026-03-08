@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/authContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, Menu, X } from "lucide-react";
+import { LogOut, Menu, X, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import LanguageSelector from "@/components/LanguageSelector";
 import servnestLogo from "@/assets/servnest-logo.png";
@@ -48,6 +48,11 @@ const Navbar = () => {
           <LanguageSelector />
           {user ? (
             <div className="flex items-center gap-3">
+              <Link to="/chats">
+                <Button variant="ghost" size="sm" title="Chats">
+                  <MessageCircle className="h-4 w-4" />
+                </Button>
+              </Link>
               <Link to={user.role === "provider" ? "/provider-dashboard" : "/customer-dashboard"}>
                 <Button size="sm">{t("nav.dashboard")}</Button>
               </Link>
