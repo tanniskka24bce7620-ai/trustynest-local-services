@@ -143,7 +143,10 @@ const BookingPage = () => {
         <ArrowLeft className="mr-1 h-4 w-4" /> {t("booking.back")}
       </Button>
 
-      <h1 className="text-2xl font-bold mb-6">{t("booking.title")}</h1>
+      <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+        {isEmergency && <Siren className="h-6 w-6 text-destructive" />}
+        {isEmergency ? t("emergency.bookTitle") : t("booking.title")}
+      </h1>
 
       <div className="rounded-xl border border-border bg-card p-5 shadow-soft mb-6">
         <div className="flex gap-4">
