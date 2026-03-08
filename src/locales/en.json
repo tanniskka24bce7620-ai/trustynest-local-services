@@ -168,7 +168,12 @@
     "rating": "Rating",
     "reviews": "Reviews",
     "uploadPhoto": "Upload",
-    "photoHint": "Click to upload a profile photo (JPG, PNG, max 5MB)"
+    "photoHint": "Click to upload a profile photo (JPG, PNG, max 5MB)",
+    "location": "Location Coordinates",
+    "detectLocation": "Detect My Location",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "locationHint": "Click 'Detect My Location' or enter coordinates manually for distance-based matching"
   },
   "booking": {
     "title": "Book a Service",
