@@ -48,6 +48,11 @@ const Navbar = () => {
           <LanguageSelector />
           {user ? (
             <div className="flex items-center gap-3">
+              <Link to="/chats">
+                <Button variant="ghost" size="sm" title="Chats">
+                  <MessageCircle className="h-4 w-4" />
+                </Button>
+              </Link>
               <Link to={user.role === "provider" ? "/provider-dashboard" : "/customer-dashboard"}>
                 <Button size="sm">{t("nav.dashboard")}</Button>
               </Link>
