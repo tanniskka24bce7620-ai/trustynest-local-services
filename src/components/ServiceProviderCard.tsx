@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ServiceProvider, SERVICE_ICONS } from "@/lib/mockData";
-import { Star, MapPin, Clock, CheckCircle, Phone } from "lucide-react";
+import { Star, MapPin, Clock, CheckCircle, Phone, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
