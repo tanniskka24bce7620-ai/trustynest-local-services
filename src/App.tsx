@@ -18,6 +18,7 @@ import BookingPage from "./pages/BookingPage";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import HallOfFame from "./pages/HallOfFame";
 
 const queryClient = new QueryClient();
 
