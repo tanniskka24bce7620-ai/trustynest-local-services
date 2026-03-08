@@ -558,6 +558,18 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_trust_scores: {
+        Args: { provider_ids?: string[] }
+        Returns: {
+          average_rating: number
+          cancellations: number
+          complaints_count: number
+          completed_jobs: number
+          positive_reviews: number
+          service_profile_id: string
+          trust_score: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
