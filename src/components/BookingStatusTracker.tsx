@@ -132,6 +132,11 @@ const BookingStatusTracker = () => {
                 </Button>
               </div>
             )}
+            {b.status === "completed" && (
+              <Button size="sm" variant="outline" className="shrink-0 gap-1 text-destructive hover:text-destructive border-destructive/30" onClick={() => setComplaintBooking(b)}>
+                <ShieldAlert className="h-3 w-3" /> {t("complaint.reportIssue")}
+              </Button>
+            )}
           </div>
           <div className="mt-3 flex items-center gap-1">
             {["pending", "confirmed", "completed"].map((step, i) => {
