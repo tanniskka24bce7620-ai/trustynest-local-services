@@ -29,6 +29,7 @@ const ProviderDashboard = () => {
   const [serviceProfileId, setServiceProfileId] = useState<string | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string>("");
   const [uploading, setUploading] = useState(false);
+  const [trustData, setTrustData] = useState<any>(null);
 
   const [form, setForm] = useState({
     name: "", age: "", experience: "", contact: "", serviceType: "", city: "", area: "", bio: "", available: true, latitude: "", longitude: "", emergencyAvailable: false,
