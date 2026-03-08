@@ -47,6 +47,22 @@ const BookingPage = () => {
   const [dayAvailable, setDayAvailable] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState<{ code: string; id: string } | null>(null);
+  const [customerLocation, setCustomerLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+
+  // Request customer location on mount
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCustomerLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationLoading(false);
+      },
+      () => setLocationLoading(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
 
   useEffect(() => {
     if (!spId) return;
