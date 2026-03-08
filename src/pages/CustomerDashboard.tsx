@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
+import ComplaintTracker from "@/components/ComplaintTracker";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/authContext";
 import { useNavigate } from "react-router-dom";
