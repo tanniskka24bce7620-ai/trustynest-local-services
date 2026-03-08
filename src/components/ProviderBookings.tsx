@@ -61,6 +61,7 @@ const TripControls = ({ booking, onStatusChange }: { booking: Booking; onStatusC
 const ProviderBookings = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
