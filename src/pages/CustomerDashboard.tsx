@@ -185,6 +185,7 @@ const CustomerDashboard = () => {
     if (sortBy === "rating") return b.rating - a.rating;
     if (sortBy === "reviews") return b.reviewCount - a.reviewCount;
     if (sortBy === "experience") return b.experience - a.experience;
+    if (sortBy === "trust") return (b.trustScore ?? 0) - (a.trustScore ?? 0);
     return 0;
   });
 
