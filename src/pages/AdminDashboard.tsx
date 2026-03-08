@@ -88,6 +88,8 @@ const AdminDashboard = () => {
   const [adminNotes, setAdminNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [flaggedProviders, setFlaggedProviders] = useState<string[]>([]);
+  const [trustProviders, setTrustProviders] = useState<TrustProvider[]>([]);
+  const [trustLoading, setTrustLoading] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
