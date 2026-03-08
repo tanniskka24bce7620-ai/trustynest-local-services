@@ -41,6 +41,32 @@ const CustomerDashboard = () => {
   const [sortBy, setSortBy] = useState<string>("distance");
   const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const voice = useVoiceSearch();
+
+  // Apply voice search results
+  useEffect(() => {
+    if (!voice.transcript) return;
+    // Clean transcript: remove "near me" style phrases for search text
+    let cleaned = voice.transcript;
+    ["near me", "nearby", "near by", "around me", "मेरे पास", "पास में", "आस पास", "என் அருகில்", "அருகில்", "నా దగ్గర", "సమీపంలో"]
+      .forEach((kw) => { cleaned = cleaned.replace(new RegExp(kw, "gi"), ""); });
+    ["book a", "find", "show", "search for", "search", "book"]
+      .forEach((kw) => { cleaned = cleaned.replace(new RegExp(`^${kw}\\s+`, "i"), ""); });
+    cleaned = cleaned.trim();
+
+    if (voice.matchedCategory) {
+      setCategoryFilter(voice.matchedCategory);
+      setSearch("");
+    } else if (cleaned) {
+      setSearch(cleaned);
+      setCategoryFilter("all");
+    }
+
+    if (voice.wantsNearby) {
+      setSortBy("distance");
+      if (!position) requestLocation();
+    }
+  }, [voice.transcript, voice.matchedCategory, voice.wantsNearby]);
 
   useEffect(() => {
     if (authLoading) return;
