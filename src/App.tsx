@@ -33,6 +33,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login/:role" element={<Login />} />
             <Route path="/signup/:role" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-aadhaar" element={<VerifyAadhaar />} />
             <Route path="/auth-redirect" element={<AuthRedirect />} />
             <Route path="/provider-dashboard" element={<ProviderDashboard />} />
