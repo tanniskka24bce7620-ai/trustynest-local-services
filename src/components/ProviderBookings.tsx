@@ -58,10 +58,15 @@ const ProviderBookings = () => {
   return (
     <div className="space-y-3">
       {bookings.map((b) => (
-        <div key={b.id} className="rounded-xl border border-border bg-card p-4 shadow-soft">
+        <div key={b.id} className={`rounded-xl border bg-card p-4 shadow-soft ${b.is_emergency && b.status === "pending" ? "border-destructive/40 ring-1 ring-destructive/20" : "border-border"}`}>
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
+                {b.is_emergency && (
+                  <Badge className="gap-1 bg-destructive/10 text-destructive border-destructive/30 text-xs">
+                    <Siren className="h-3 w-3" /> Emergency
+                  </Badge>
+                )}
                 <span className="font-semibold">{b.customer_name}</span>
                 <Badge className={cn("text-xs", STATUS_STYLES[b.status])}>{b.status}</Badge>
               </div>
