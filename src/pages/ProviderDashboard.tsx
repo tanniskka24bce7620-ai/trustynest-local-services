@@ -192,6 +192,15 @@ const ProviderDashboard = () => {
                   <span className="text-sm font-medium">{t("providerDashboard.available")}</span>
                   <Switch checked={form.available} onCheckedChange={async (v) => { handleChange("available", v); if (serviceProfileId) await supabase.from("service_profiles").update({ available: v } as any).eq("id", serviceProfileId); }} />
                 </div>
+                {EMERGENCY_SERVICE_TYPES.includes(form.serviceType) && (
+                  <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+                    <div className="flex items-center gap-2">
+                      <Siren className="h-4 w-4 text-destructive" />
+                      <span className="text-sm font-medium">{t("emergency.enableToggle")}</span>
+                    </div>
+                    <Switch checked={form.emergencyAvailable} onCheckedChange={async (v) => { handleChange("emergencyAvailable", v); if (serviceProfileId) await supabase.from("service_profiles").update({ emergency_available: v } as any).eq("id", serviceProfileId); }} />
+                  </div>
+                )}
               </div>
             )}
 
