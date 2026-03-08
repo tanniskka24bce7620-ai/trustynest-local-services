@@ -273,6 +273,7 @@ const ChatPage = () => {
             myLanguage={myLanguage}
             showOriginal={showOriginal.has(msg.id)}
             onToggleOriginal={toggleOriginal}
+            currentUserId={user?.id || ""}
           />
         ))}
 
