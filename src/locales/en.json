@@ -371,5 +371,26 @@
     "updateComplaint": "Update Complaint",
     "flaggedAlert": "Flagged Providers Detected",
     "flaggedDesc": "{{count}} provider(s) have received 3+ high-severity complaints this month."
+  },
+  "imageRequest": {
+    "title": "📷 Upload a Photo – We'll Find the Right Service",
+    "subtitle": "Take a photo of your problem and our AI will suggest the right service provider",
+    "dragDrop": "Drag & drop an image here, or click to upload",
+    "formats": "JPG, PNG, WEBP • Max 5 MB",
+    "uploadBtn": "Upload Photo",
+    "cameraBtn": "Take Photo",
+    "invalidFormat": "Please upload a JPG, PNG, or WEBP image",
+    "tooLarge": "File size must be under 5 MB",
+    "analyzing": "Analyzing your problem...",
+    "analyzingDesc": "Our AI is identifying the issue in your photo",
+    "suggestedService": "Suggested Service",
+    "confidence": "confidence",
+    "notCorrect": "Not correct?",
+    "chooseManually": "Choose service manually",
+    "suggestedProviders": "Available {{category}} Providers",
+    "noProviders": "No providers available in this category right now.",
+    "loginRequired": "Please log in to upload photos and find services.",
+    "analysisFailed": "Could not analyze image. Please try again.",
+    "privacyNote": "Your uploaded images are analyzed securely and used only for service matching. We respect your privacy."
   }
 }
