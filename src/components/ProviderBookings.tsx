@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Clock, Loader2, Check, X, Siren, Navigation } from "lucide-react";
+import { CalendarIcon, Clock, Loader2, Check, X, Siren, Navigation, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProviderTracking } from "@/hooks/useProviderTracking";
+import { useNavigate } from "react-router-dom";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-warning/10 text-warning border-warning/30",
@@ -60,6 +61,7 @@ const TripControls = ({ booking, onStatusChange }: { booking: Booking; onStatusC
 const ProviderBookings = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -124,6 +126,11 @@ const ProviderBookings = () => {
                     <X className="h-3 w-3 mr-1" /> {t("providerBookings.decline")}
                   </Button>
                 </>
+              )}
+              {b.status === "confirmed" && (
+                <Button size="sm" variant="outline" className="gap-1" onClick={() => navigate(`/chat/${b.id}`)}>
+                  <MessageCircle className="h-3 w-3" /> Chat
+                </Button>
               )}
               <TripControls booking={b} onStatusChange={loadBookings} />
             </div>
