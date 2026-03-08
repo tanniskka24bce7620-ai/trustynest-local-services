@@ -278,5 +278,11 @@
     "markRead": "Mark as read",
     "clearAll": "Clear all notifications",
     "delete": "Delete"
+  },
+  "location": {
+    "detecting": "Detecting location...",
+    "detected": "Location detected",
+    "enable": "Enable Location",
+    "manualSelect": "Set Location"
   }
 }
