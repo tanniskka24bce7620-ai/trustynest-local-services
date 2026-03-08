@@ -52,6 +52,11 @@ const Navbar = () => {
               <Link to={user.role === "provider" ? "/provider-dashboard" : "/customer-dashboard"}>
                 <Button size="sm">{t("nav.dashboard")}</Button>
               </Link>
+              {user.role === ("admin" as any) && (
+                <Link to="/admin">
+                  <Button size="sm" variant="outline">Admin</Button>
+                </Link>
+              )}
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="mr-1 h-4 w-4" /> {t("nav.logout")}
               </Button>
