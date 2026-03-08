@@ -71,14 +71,17 @@ const ProviderDashboard = () => {
 
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8">
-      <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-hero">
-          <span className="text-lg font-bold text-primary-foreground">{form.serviceType ? SERVICE_ICONS[form.serviceType] || "👷" : "👷"}</span>
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-hero">
+            <span className="text-lg font-bold text-primary-foreground">{form.serviceType ? SERVICE_ICONS[form.serviceType] || "👷" : "👷"}</span>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">{t("providerDashboard.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("providerDashboard.subtitle")}</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold">{t("providerDashboard.title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("providerDashboard.subtitle")}</p>
-        </div>
+        <NotificationBell />
       </div>
 
       {user.aadhaarVerified && (
