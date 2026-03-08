@@ -28,6 +28,15 @@ export interface ServiceProvider {
   longitude?: number | null;
   distance?: number;
   emergencyAvailable?: boolean;
+  trustScore?: number;
+  trustData?: {
+    trust_score: number;
+    completed_jobs: number;
+    positive_reviews: number;
+    complaints_count: number;
+    cancellations: number;
+    average_rating: number;
+  };
 }
 
 export interface Review {

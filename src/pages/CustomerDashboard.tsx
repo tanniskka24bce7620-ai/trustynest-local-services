@@ -97,9 +97,15 @@ const CustomerDashboard = () => {
         reviewMap.set(r.service_profile_id, list);
       });
 
+      // Fetch trust scores
+      const { data: trustScores } = await supabase.rpc("get_trust_scores", { provider_ids: spIds });
+      const trustMap = new Map<string, any>();
+      (trustScores as any[] || []).forEach((ts: any) => trustMap.set(ts.service_profile_id, ts));
+
       const mapped: ServiceProvider[] = (serviceProfiles as any[]).map((sp: any) => {
         const profile = profileMap.get(sp.user_id) as any;
         const reviews = reviewMap.get(sp.id) || [];
+        const trust = trustMap.get(sp.id);
         return {
           id: sp.id, name: profile?.name || "Unknown", age: sp.age || 0, experience: sp.experience || 0,
           contact: profile?.contact || "", serviceType: sp.service_type, city: profile?.city || "", area: profile?.area || "",
@@ -107,6 +113,8 @@ const CustomerDashboard = () => {
           available: sp.available, verified: profile?.aadhaar_verified || false, rating: parseFloat(sp.rating) || 0, reviewCount: sp.review_count || 0,
           latitude: sp.latitude, longitude: sp.longitude,
           emergencyAvailable: sp.emergency_available || false,
+          trustScore: trust?.trust_score ?? 0,
+          trustData: trust ? { trust_score: trust.trust_score, completed_jobs: Number(trust.completed_jobs), positive_reviews: Number(trust.positive_reviews), complaints_count: Number(trust.complaints_count), cancellations: Number(trust.cancellations), average_rating: Number(trust.average_rating) } : undefined,
           reviews: reviews.map((r: any) => ({ id: r.id, customerName: "Customer", rating: r.rating, comment: r.comment || "", date: r.created_at?.slice(0, 10) || "" })),
         };
       });
@@ -177,6 +185,7 @@ const CustomerDashboard = () => {
     if (sortBy === "rating") return b.rating - a.rating;
     if (sortBy === "reviews") return b.reviewCount - a.reviewCount;
     if (sortBy === "experience") return b.experience - a.experience;
+    if (sortBy === "trust") return (b.trustScore ?? 0) - (a.trustScore ?? 0);
     return 0;
   });
 
@@ -314,6 +323,7 @@ const CustomerDashboard = () => {
                   <SelectItem value="rating">{t("customerDashboard.highestRating")}</SelectItem>
                   <SelectItem value="reviews">{t("customerDashboard.mostReviews")}</SelectItem>
                   <SelectItem value="experience">{t("customerDashboard.mostExperience")}</SelectItem>
+                  <SelectItem value="trust">{t("trustScore.sortByTrust")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

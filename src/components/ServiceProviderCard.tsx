@@ -4,6 +4,7 @@ import { ServiceProvider, SERVICE_ICONS } from "@/lib/mockData";
 import { Star, MapPin, Clock, CheckCircle, Phone, Navigation, Siren } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import TrustScoreBadge from "@/components/TrustScoreBadge";
 
 interface Props {
   provider: ServiceProvider;
@@ -28,6 +29,7 @@ const ServiceProviderCard = ({ provider, onViewProfile, emergencyMode }: Props) 
               </div>
             </div>
             <div className="flex flex-col items-end gap-1 shrink-0">
+              {provider.trustScore != null && <TrustScoreBadge score={provider.trustScore} />}
               {provider.verified && (
                 <Badge variant="outline" className="gap-1 border-success/30 bg-success/10 text-success">
                   <CheckCircle className="h-3 w-3" /> {t("providerCard.verified")}

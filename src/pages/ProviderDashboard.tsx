@@ -12,9 +12,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Star, Edit2, Save, Loader2, CalendarIcon, Camera, MapPin, Siren } from "lucide-react";
+import { CheckCircle, Star, Edit2, Save, Loader2, CalendarIcon, Camera, MapPin, Siren, Shield } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NotificationBell from "@/components/NotificationBell";
+import TrustScoreBreakdown from "@/components/TrustScoreBreakdown";
 
 const ProviderDashboard = () => {
   const { t } = useTranslation();
@@ -28,6 +29,7 @@ const ProviderDashboard = () => {
   const [serviceProfileId, setServiceProfileId] = useState<string | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string>("");
   const [uploading, setUploading] = useState(false);
+  const [trustData, setTrustData] = useState<any>(null);
 
   const [form, setForm] = useState({
     name: "", age: "", experience: "", contact: "", serviceType: "", city: "", area: "", bio: "", available: true, latitude: "", longitude: "", emergencyAvailable: false,
@@ -50,7 +52,15 @@ const ProviderDashboard = () => {
         emergencyAvailable: s?.emergency_available ?? false,
       });
       if (p?.photo_url) setPhotoUrl(p.photo_url);
-      if (s) { setServiceProfileId(s.id); setProfileSaved(true); setEditing(false); }
+      if (s) {
+        setServiceProfileId(s.id); setProfileSaved(true); setEditing(false);
+        // Fetch trust score
+        const { data: ts } = await supabase.rpc("get_trust_scores", { provider_ids: [s.id] });
+        if (ts && (ts as any[]).length > 0) {
+          const t = (ts as any[])[0];
+          setTrustData({ trust_score: t.trust_score, completed_jobs: Number(t.completed_jobs), positive_reviews: Number(t.positive_reviews), complaints_count: Number(t.complaints_count), cancellations: Number(t.cancellations), average_rating: Number(t.average_rating) });
+        }
+      }
     };
     load();
   }, [user, authLoading, navigate]);
@@ -140,6 +150,7 @@ const ProviderDashboard = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="profile"><Edit2 className="h-4 w-4 mr-1" /> {t("providerDashboard.profile")}</TabsTrigger>
           <TabsTrigger value="bookings"><CalendarIcon className="h-4 w-4 mr-1" /> {t("providerDashboard.bookings")}</TabsTrigger>
+          <TabsTrigger value="trust"><Shield className="h-4 w-4 mr-1" /> {t("trustScore.title")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
@@ -294,6 +305,26 @@ const ProviderDashboard = () => {
         </TabsContent>
 
         <TabsContent value="bookings"><ProviderBookings /></TabsContent>
+
+        <TabsContent value="trust">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+            <h2 className="text-lg font-semibold mb-4">{t("trustScore.performance")}</h2>
+            {trustData ? (
+              <>
+                <TrustScoreBreakdown data={trustData} />
+                {trustData.trust_score < 60 && (
+                  <div className="mt-4 rounded-lg border border-warning/30 bg-warning/5 p-3 text-sm text-warning">
+                    💡 {t("trustScore.improveTip")}
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground py-8 text-center">
+                {t("trustScore.disclaimer")}
+              </p>
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Hidden file input shared between edit and view modes */}

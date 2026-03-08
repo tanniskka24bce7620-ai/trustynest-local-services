@@ -11,8 +11,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ShieldAlert, Search, Loader2, Eye, ExternalLink, AlertTriangle } from "lucide-react";
+import { ShieldAlert, Search, Loader2, Eye, ExternalLink, AlertTriangle, Shield } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+
+interface TrustProvider {
+  service_profile_id: string;
+  user_id: string;
+  provider_name: string;
+  service_type: string;
+  trust_score: number;
+  completed_jobs: number;
+  positive_reviews: number;
+  complaints_count: number;
+  cancellations: number;
+  average_rating: number;
+}
 
 const STATUS_STYLES: Record<string, string> = {
   pending_review: "bg-warning/10 text-warning border-warning/30",
@@ -73,6 +88,8 @@ const AdminDashboard = () => {
   const [adminNotes, setAdminNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [flaggedProviders, setFlaggedProviders] = useState<string[]>([]);
+  const [trustProviders, setTrustProviders] = useState<TrustProvider[]>([]);
+  const [trustLoading, setTrustLoading] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -89,6 +106,34 @@ const AdminDashboard = () => {
     }
     setIsAdmin(true);
     loadComplaints();
+    loadTrustData();
+  };
+
+  const loadTrustData = async () => {
+    setTrustLoading(true);
+    const { data: scores } = await supabase.rpc("get_trust_scores");
+    if (!scores || (scores as any[]).length === 0) { setTrustProviders([]); setTrustLoading(false); return; }
+    const userIds = [...new Set((scores as any[]).map((s: any) => s.user_id))];
+    const { data: profiles } = await supabase.from("profiles").select("user_id, name").in("user_id", userIds);
+    const profileMap = new Map((profiles as any[] || []).map((p: any) => [p.user_id, p.name]));
+    const { data: sps } = await supabase.from("service_profiles").select("id, service_type, user_id");
+    const spMap = new Map((sps as any[] || []).map((s: any) => [s.id, s]));
+    const mapped: TrustProvider[] = (scores as any[]).map((s: any) => {
+      const sp = spMap.get(s.service_profile_id);
+      return {
+        ...s,
+        provider_name: profileMap.get(s.user_id) || "Unknown",
+        service_type: sp?.service_type || "",
+        completed_jobs: Number(s.completed_jobs),
+        positive_reviews: Number(s.positive_reviews),
+        complaints_count: Number(s.complaints_count),
+        cancellations: Number(s.cancellations),
+        average_rating: Number(s.average_rating),
+      };
+    });
+    mapped.sort((a, b) => a.trust_score - b.trust_score);
+    setTrustProviders(mapped);
+    setTrustLoading(false);
   };
 
   const loadComplaints = async () => {
@@ -179,7 +224,13 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Flagged provider alerts */}
+      <Tabs defaultValue="complaints" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="complaints"><ShieldAlert className="h-4 w-4 mr-1" /> Complaints</TabsTrigger>
+          <TabsTrigger value="trust"><Shield className="h-4 w-4 mr-1" /> {t("trustScore.trustMonitoring")}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="complaints">
       {flaggedProviders.length > 0 && (
         <div className="mb-4 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -384,6 +435,66 @@ const AdminDashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+        </TabsContent>
+
+        <TabsContent value="trust">
+          {trustLoading ? (
+            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto my-8" />
+          ) : (
+            <div className="rounded-xl border border-border overflow-hidden">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Provider</TableHead>
+                      <TableHead>Service</TableHead>
+                      <TableHead>{t("trustScore.title")}</TableHead>
+                      <TableHead>Rating</TableHead>
+                      <TableHead>Jobs</TableHead>
+                      <TableHead>Reviews</TableHead>
+                      <TableHead>{t("trustScore.complaints")}</TableHead>
+                      <TableHead>{t("trustScore.cancellations")}</TableHead>
+                      <TableHead>{t("trustScore.riskLevel")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {trustProviders.length === 0 ? (
+                      <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No providers found</TableCell></TableRow>
+                    ) : (
+                      trustProviders.map((p) => {
+                        const risk = p.trust_score < 40 ? "high" : p.trust_score < 60 ? "medium" : "low";
+                        return (
+                          <TableRow key={p.service_profile_id} className={risk === "high" ? "bg-destructive/5" : ""}>
+                            <TableCell className="font-medium">{p.provider_name}</TableCell>
+                            <TableCell className="text-sm">{p.service_type}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-sm">{p.trust_score}</span>
+                                <Progress value={p.trust_score} className={`h-2 w-16 ${p.trust_score >= 75 ? "[&>div]:bg-success" : p.trust_score >= 40 ? "[&>div]:bg-warning" : "[&>div]:bg-destructive"}`} />
+                              </div>
+                            </TableCell>
+                            <TableCell>{p.average_rating}</TableCell>
+                            <TableCell>{p.completed_jobs}</TableCell>
+                            <TableCell>{p.positive_reviews}</TableCell>
+                            <TableCell>{p.complaints_count}</TableCell>
+                            <TableCell>{p.cancellations}</TableCell>
+                            <TableCell>
+                              <Badge className={`text-xs ${risk === "high" ? "bg-destructive/10 text-destructive border-destructive/30" : risk === "medium" ? "bg-warning/10 text-warning border-warning/30" : "bg-success/10 text-success border-success/30"}`}>
+                                {risk === "high" ? t("trustScore.highRisk") : risk === "medium" ? t("trustScore.mediumRisk") : t("trustScore.lowRisk")}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

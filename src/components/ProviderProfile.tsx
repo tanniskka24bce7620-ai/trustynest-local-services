@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import TrustScoreBreakdown from "@/components/TrustScoreBreakdown";
 
 interface Props {
   provider: ServiceProvider;
@@ -70,6 +71,12 @@ const ProviderProfile = ({ provider, onClose }: Props) => {
         </div>
 
         <div className="mt-4 rounded-lg bg-muted p-3"><p className="text-sm">{provider.bio}</p></div>
+
+        {provider.trustData && (
+          <div className="mt-4 rounded-lg border border-border p-4">
+            <TrustScoreBreakdown data={provider.trustData} />
+          </div>
+        )}
 
         <div className="mt-4 flex gap-2">
           <a href={`tel:${provider.contact}`} className="flex-1">
