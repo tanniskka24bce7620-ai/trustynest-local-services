@@ -20,6 +20,7 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import HallOfFame from "./pages/HallOfFame";
 import AdminDashboard from "./pages/AdminDashboard";
+import TrackingPage from "./pages/TrackingPage";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/hall-of-fame" element={<HallOfFame />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/track/:bookingId" element={<TrackingPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

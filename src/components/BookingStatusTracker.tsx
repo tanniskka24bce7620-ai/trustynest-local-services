@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { CalendarIcon, Clock, Loader2, X, RefreshCw, ShieldAlert } from "lucide-react";
+import { CalendarIcon, Clock, Loader2, X, RefreshCw, ShieldAlert, MapPin } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, isBefore, startOfDay, addDays } from "date-fns";
@@ -30,6 +31,7 @@ interface Booking {
 const BookingStatusTracker = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelDialog, setCancelDialog] = useState<Booking | null>(null);
@@ -123,7 +125,12 @@ const BookingStatusTracker = () => {
               {b.cancellation_reason && <p className="mt-1 text-xs text-destructive">{t("bookingTracker.reason")}: {b.cancellation_reason}</p>}
             </div>
             {(b.status === "pending" || b.status === "confirmed") && (
-              <div className="flex gap-1 shrink-0">
+              <div className="flex gap-1 shrink-0 flex-wrap justify-end">
+                {b.status === "confirmed" && (
+                  <Button size="sm" className="gap-1 gradient-hero border-0 text-primary-foreground" onClick={() => navigate(`/track/${b.id}`)}>
+                    <MapPin className="h-3 w-3" /> Track
+                  </Button>
+                )}
                 <Button size="sm" variant="outline" onClick={() => { setRescheduleDialog(b); setNewDate(undefined); setNewSlot(null); }}>
                   <RefreshCw className="h-3 w-3 mr-1" /> {t("bookingTracker.reschedule")}
                 </Button>

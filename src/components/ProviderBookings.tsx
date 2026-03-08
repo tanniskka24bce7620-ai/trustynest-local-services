@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/authContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Clock, Loader2, Check, X, Siren } from "lucide-react";
+import { CalendarIcon, Clock, Loader2, Check, X, Siren, Navigation } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProviderTracking } from "@/hooks/useProviderTracking";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-warning/10 text-warning border-warning/30",
@@ -19,6 +20,42 @@ interface Booking {
   status: string; service_note: string; customer_name: string;
   is_emergency: boolean;
 }
+
+const TripControls = ({ booking, onStatusChange }: { booking: Booking; onStatusChange: () => void }) => {
+  const { user } = useAuth();
+  const { tracking, startTracking, stopTracking } = useProviderTracking(booking.id, user?.id || null);
+
+  const handleStartTrip = async () => {
+    await startTracking();
+  };
+
+  const handleCompleteService = async () => {
+    await stopTracking();
+    await supabase.from("bookings").update({ status: "completed" } as any).eq("id", booking.id);
+    onStatusChange();
+  };
+
+  if (booking.status !== "confirmed") return null;
+
+  return (
+    <div className="flex gap-1">
+      {!tracking ? (
+        <Button size="sm" className="gap-1 gradient-hero border-0 text-primary-foreground" onClick={handleStartTrip}>
+          <Navigation className="h-3 w-3" /> Start Trip
+        </Button>
+      ) : (
+        <>
+          <Badge variant="outline" className="gap-1 border-success/30 bg-success/10 text-success animate-pulse text-xs">
+            <Navigation className="h-3 w-3" /> Tracking Live
+          </Badge>
+          <Button size="sm" variant="outline" className="gap-1 text-success border-success/30" onClick={handleCompleteService}>
+            <Check className="h-3 w-3" /> Complete Service
+          </Button>
+        </>
+      )}
+    </div>
+  );
+};
 
 const ProviderBookings = () => {
   const { t } = useTranslation();
@@ -77,7 +114,7 @@ const ProviderBookings = () => {
               {b.service_note && <p className="mt-1 text-xs text-muted-foreground">{b.service_note}</p>}
               <p className="mt-1 text-xs text-muted-foreground font-mono">ID: {b.booking_code.toUpperCase()}</p>
             </div>
-            <div className="flex gap-1 shrink-0">
+            <div className="flex gap-1 shrink-0 flex-wrap justify-end">
               {b.status === "pending" && (
                 <>
                   <Button size="sm" variant="outline" className="text-success border-success/30" onClick={() => updateStatus(b.id, "confirmed")}>
@@ -88,11 +125,7 @@ const ProviderBookings = () => {
                   </Button>
                 </>
               )}
-              {b.status === "confirmed" && (
-                <Button size="sm" variant="outline" className="text-success border-success/30" onClick={() => updateStatus(b.id, "completed")}>
-                  <Check className="h-3 w-3 mr-1" /> {t("providerBookings.complete")}
-                </Button>
-              )}
+              <TripControls booking={b} onStatusChange={loadBookings} />
             </div>
           </div>
         </div>
