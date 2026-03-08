@@ -216,6 +216,32 @@ const CustomerDashboard = () => {
         <TabsContent value="bookings"><BookingStatusTracker /></TabsContent>
 
         <TabsContent value="browse">
+          {/* Emergency Mode Toggle */}
+          <div className={`mb-4 flex items-center justify-between rounded-xl border p-4 transition-colors ${emergencyMode ? "border-destructive/40 bg-destructive/5" : "border-border bg-card"}`}>
+            <div className="flex items-center gap-3">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${emergencyMode ? "bg-destructive/10" : "bg-muted"}`}>
+                <Siren className={`h-5 w-5 ${emergencyMode ? "text-destructive animate-pulse" : "text-muted-foreground"}`} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">{t("emergency.toggleTitle")}</p>
+                <p className="text-xs text-muted-foreground">{t("emergency.toggleDesc")}</p>
+              </div>
+            </div>
+            <Button
+              variant={emergencyMode ? "destructive" : "outline"}
+              size="sm"
+              onClick={() => {
+                setEmergencyMode(!emergencyMode);
+                if (!emergencyMode) {
+                  setSortBy("distance");
+                  if (!position) requestLocation();
+                }
+              }}
+            >
+              {emergencyMode ? t("emergency.disable") : t("emergency.enable")}
+            </Button>
+          </div>
+
           {/* Search & Filter bar */}
           <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-soft">
             <div className="flex items-center justify-between mb-4">
