@@ -99,7 +99,7 @@ const ProviderDashboard = () => {
     await supabase.from("profiles").update({ name: form.name, contact: form.contact, city: form.city, area: form.area, profile_complete: true } as any).eq("user_id", user.id);
     const spData = {
       service_type: form.serviceType, age: parseInt(form.age) || null, experience: parseInt(form.experience) || 0,
-      bio: form.bio, available: form.available,
+      bio: form.bio, available: form.available, emergency_available: form.emergencyAvailable,
       latitude: form.latitude ? parseFloat(form.latitude) : null,
       longitude: form.longitude ? parseFloat(form.longitude) : null,
     };
