@@ -435,6 +435,66 @@ const AdminDashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+        </TabsContent>
+
+        <TabsContent value="trust">
+          {trustLoading ? (
+            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto my-8" />
+          ) : (
+            <div className="rounded-xl border border-border overflow-hidden">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Provider</TableHead>
+                      <TableHead>Service</TableHead>
+                      <TableHead>{t("trustScore.title")}</TableHead>
+                      <TableHead>Rating</TableHead>
+                      <TableHead>Jobs</TableHead>
+                      <TableHead>Reviews</TableHead>
+                      <TableHead>{t("trustScore.complaints")}</TableHead>
+                      <TableHead>{t("trustScore.cancellations")}</TableHead>
+                      <TableHead>{t("trustScore.riskLevel")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {trustProviders.length === 0 ? (
+                      <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No providers found</TableCell></TableRow>
+                    ) : (
+                      trustProviders.map((p) => {
+                        const risk = p.trust_score < 40 ? "high" : p.trust_score < 60 ? "medium" : "low";
+                        return (
+                          <TableRow key={p.service_profile_id} className={risk === "high" ? "bg-destructive/5" : ""}>
+                            <TableCell className="font-medium">{p.provider_name}</TableCell>
+                            <TableCell className="text-sm">{p.service_type}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-sm">{p.trust_score}</span>
+                                <Progress value={p.trust_score} className={`h-2 w-16 ${p.trust_score >= 75 ? "[&>div]:bg-success" : p.trust_score >= 40 ? "[&>div]:bg-warning" : "[&>div]:bg-destructive"}`} />
+                              </div>
+                            </TableCell>
+                            <TableCell>{p.average_rating}</TableCell>
+                            <TableCell>{p.completed_jobs}</TableCell>
+                            <TableCell>{p.positive_reviews}</TableCell>
+                            <TableCell>{p.complaints_count}</TableCell>
+                            <TableCell>{p.cancellations}</TableCell>
+                            <TableCell>
+                              <Badge className={`text-xs ${risk === "high" ? "bg-destructive/10 text-destructive border-destructive/30" : risk === "medium" ? "bg-warning/10 text-warning border-warning/30" : "bg-success/10 text-success border-success/30"}`}>
+                                {risk === "high" ? t("trustScore.highRisk") : risk === "medium" ? t("trustScore.mediumRisk") : t("trustScore.lowRisk")}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
