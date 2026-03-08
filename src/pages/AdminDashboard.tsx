@@ -106,6 +106,34 @@ const AdminDashboard = () => {
     }
     setIsAdmin(true);
     loadComplaints();
+    loadTrustData();
+  };
+
+  const loadTrustData = async () => {
+    setTrustLoading(true);
+    const { data: scores } = await supabase.rpc("get_trust_scores");
+    if (!scores || (scores as any[]).length === 0) { setTrustProviders([]); setTrustLoading(false); return; }
+    const userIds = [...new Set((scores as any[]).map((s: any) => s.user_id))];
+    const { data: profiles } = await supabase.from("profiles").select("user_id, name").in("user_id", userIds);
+    const profileMap = new Map((profiles as any[] || []).map((p: any) => [p.user_id, p.name]));
+    const { data: sps } = await supabase.from("service_profiles").select("id, service_type, user_id");
+    const spMap = new Map((sps as any[] || []).map((s: any) => [s.id, s]));
+    const mapped: TrustProvider[] = (scores as any[]).map((s: any) => {
+      const sp = spMap.get(s.service_profile_id);
+      return {
+        ...s,
+        provider_name: profileMap.get(s.user_id) || "Unknown",
+        service_type: sp?.service_type || "",
+        completed_jobs: Number(s.completed_jobs),
+        positive_reviews: Number(s.positive_reviews),
+        complaints_count: Number(s.complaints_count),
+        cancellations: Number(s.cancellations),
+        average_rating: Number(s.average_rating),
+      };
+    });
+    mapped.sort((a, b) => a.trust_score - b.trust_score);
+    setTrustProviders(mapped);
+    setTrustLoading(false);
   };
 
   const loadComplaints = async () => {
