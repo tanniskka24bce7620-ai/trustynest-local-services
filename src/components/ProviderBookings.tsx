@@ -17,6 +17,7 @@ const STATUS_STYLES: Record<string, string> = {
 interface Booking {
   id: string; booking_code: string; booking_date: string; time_slot: string;
   status: string; service_note: string; customer_name: string;
+  is_emergency: boolean;
 }
 
 const ProviderBookings = () => {
