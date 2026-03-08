@@ -5,6 +5,7 @@ import { Shield, Users, Search, Star, Wrench, ChevronRight } from "lucide-react"
 import { SERVICE_ICONS } from "@/lib/mockData";
 import heroBanner from "@/assets/hero-banner.jpg";
 import LeaderboardSection from "@/components/LeaderboardSection";
+import ImageServiceRequest from "@/components/ImageServiceRequest";
 
 const Index = () => {
   const { t } = useTranslation();
