@@ -11,6 +11,7 @@ import VoiceRecorder from "@/components/chat/VoiceRecorder";
 import ChatMessageBubble from "@/components/chat/ChatMessageBubble";
 import TypingIndicator from "@/components/chat/TypingIndicator";
 import { useChatNotifications } from "@/hooks/useChatNotifications";
+import { usePresence } from "@/hooks/usePresence";
 
 interface ChatMessage {
   id: string;
@@ -45,6 +46,7 @@ const ChatPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { notify } = useChatNotifications();
+  const { partnerOnline } = usePresence(bookingId, user?.id);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
@@ -240,12 +242,20 @@ const ChatPage = () => {
         </Button>
         {partner && (
           <div className="flex items-center gap-3 flex-1">
-            <img src={partner.photo_url} alt={partner.name} className="h-9 w-9 rounded-full object-cover border border-border" />
+            <div className="relative">
+              <img src={partner.photo_url} alt={partner.name} className="h-9 w-9 rounded-full object-cover border border-border" />
+              <span className={cn(
+                "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-card",
+                partnerOnline ? "bg-green-500" : "bg-muted-foreground/40"
+              )} />
+            </div>
             <div>
               <p className="font-semibold text-sm">{partner.name}</p>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 {partnerTyping ? (
                   <span className="text-primary animate-pulse">typing…</span>
+                ) : partnerOnline ? (
+                  <span className="text-green-600">Online</span>
                 ) : (
                   <><Globe className="h-3 w-3" /> {LANG_NAMES[partner.language] || partner.language}</>
                 )}
@@ -273,6 +283,7 @@ const ChatPage = () => {
             myLanguage={myLanguage}
             showOriginal={showOriginal.has(msg.id)}
             onToggleOriginal={toggleOriginal}
+            currentUserId={user?.id || ""}
           />
         ))}
 
