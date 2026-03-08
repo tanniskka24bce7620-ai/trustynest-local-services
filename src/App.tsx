@@ -8,6 +8,8 @@ import Navbar from "@/components/Navbar";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import VerifyAadhaar from "./pages/VerifyAadhaar";
 import AuthRedirect from "./pages/AuthRedirect";
 import ProviderDashboard from "./pages/ProviderDashboard";
