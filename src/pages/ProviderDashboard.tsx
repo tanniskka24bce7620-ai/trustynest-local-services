@@ -305,6 +305,26 @@ const ProviderDashboard = () => {
         </TabsContent>
 
         <TabsContent value="bookings"><ProviderBookings /></TabsContent>
+
+        <TabsContent value="trust">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+            <h2 className="text-lg font-semibold mb-4">{t("trustScore.performance")}</h2>
+            {trustData ? (
+              <>
+                <TrustScoreBreakdown data={trustData} />
+                {trustData.trust_score < 60 && (
+                  <div className="mt-4 rounded-lg border border-warning/30 bg-warning/5 p-3 text-sm text-warning">
+                    💡 {t("trustScore.improveTip")}
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground py-8 text-center">
+                {t("trustScore.disclaimer")}
+              </p>
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Hidden file input shared between edit and view modes */}
